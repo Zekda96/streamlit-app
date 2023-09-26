@@ -4,6 +4,8 @@ from gsheetsdb import connect
 from mplsoccer import PyPizza, add_image, FontManager
 import pandas as pd
 import numpy as np
+
+
 # ----------------------------- Functions -------------------------------------------
 
 
@@ -46,7 +48,6 @@ rows = run_query(f'SELECT * FROM "{sheet_url}"')
 pizza = rows
 pizza.reset_index(drop=True)
 
-
 # -------------------------------------- COMPONENTS ------------------------------
 
 # ---------------------------- PIZZA DATA
@@ -83,7 +84,7 @@ if rank_val in exclude_values_p90:
 else:
     div = rows['Nineties']
 
-pizza.loc[:, rank_val] = rows[rank_val]/div
+pizza.loc[:, rank_val] = rows[rank_val] / div
 
 col1, col2, col3 = st.columns(3)
 with col1:
@@ -99,11 +100,10 @@ with col2:
         value=(np.median(rows.Nineties.unique()), np.max(rows.Nineties.unique())))
     pizza = pizza[(pizza['Nineties'] >= z1) & (pizza['Nineties'] <= z2)]
 
-
 # Display rank table
 cols_to_show = ['Player', 'Team', 'Nineties', rank_val, 'Rank']
 
-pizza['Rank'] = round(pizza[rank_val].rank(pct=True)*100, 0)
+pizza['Rank'] = round(pizza[rank_val].rank(pct=True) * 100, 0)
 pizza.reset_index()
 st.dataframe(pizza[cols_to_show].sort_values('Rank', ascending=False))
 
@@ -159,7 +159,6 @@ for i, stat in enumerate(stats):
     except IndexError:
         ranks_list.append(0)
 
-
 # Labels for plot
 labels = [x.replace('_', '\n') for x in stats]
 labels = map_stat_labels(labels)
@@ -182,7 +181,6 @@ baker = PyPizza(
     inner_circle_size=20  # size of inner circle
 
 )
-
 
 fig_pizza, ax = baker.make_pizza(
     values=ranks_list,
@@ -224,7 +222,6 @@ st.pyplot(fig_pizza)
 
 st.dataframe(ranks_df[['Player'] + stats])
 
-
 st.divider()
 
 # -------------------------------------------------------- EXAMPLE CODE
@@ -244,3 +241,43 @@ if agree:
     st.write(f"Here are stats for {rows.iloc[83].Player}")
     with st.expander('Open Oven'):
         st.pyplot(fig=fig_pizza)
+
+import plotly.graph_objects as go
+
+matches = ['SV Darmstadt', 'Mainz 05', 'FC Koln', 'VfL Vochum', 'SC Freiburg']
+scores = [7.3, 8, 7.9, 7.6, 7.3]
+print(sum(scores)/5)
+
+fig_plotly = go.Figure()
+
+fig_plotly.add_trace(go.Bar(x=matches,
+                            y=scores,
+                            text=scores,
+                            textposition='inside',
+                            )
+                     )
+
+fig_plotly.update_layout(
+    title=dict(
+        text='William Pacho - Bundesliga 23/24',
+        automargin=True,
+        font_size=25,
+        y=0.9,
+        x=0.5,
+        xanchor='center',
+        yanchor='top'),
+
+    yaxis=dict(
+        title="Puntaje Fotmob",
+        title_font_size=18,
+        range=[0, 10],
+        showticklabels=False
+    ),
+
+    xaxis_tickfont_size=14,
+
+    uniformtext_minsize=15,
+    uniformtext_mode='hide',
+)
+
+st.plotly_chart(fig_plotly)
