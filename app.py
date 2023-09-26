@@ -46,7 +46,7 @@ rows = run_query(f'SELECT * FROM "{sheet_url}"')
 # ----------------------------- DATA -------------------------------------------
 # Percentiles
 pizza = rows
-pizza.reset_index(drop=True)
+pizza = pizza.reset_index(drop=True)
 
 # -------------------------------------- COMPONENTS ------------------------------
 
@@ -103,8 +103,9 @@ with col2:
 # Display rank table
 cols_to_show = ['Player', 'Team', 'Nineties', rank_val, 'Rank']
 
-pizza['Rank'] = round(pizza[rank_val].rank(pct=True) * 100, 0)
-pizza.reset_index()
+pizza['Rank'] = round(pizza[rank_val].rank(pct=True) * 100, 1)
+pizza = pizza.reset_index(drop=True)
+
 st.dataframe(pizza[cols_to_show].sort_values('Rank', ascending=False))
 
 st.divider()
@@ -246,7 +247,7 @@ import plotly.graph_objects as go
 
 matches = ['SV Darmstadt', 'Mainz 05', 'FC Koln', 'VfL Vochum', 'SC Freiburg']
 scores = [7.3, 8, 7.9, 7.6, 7.3]
-print(sum(scores)/5)
+
 
 fig_plotly = go.Figure()
 
