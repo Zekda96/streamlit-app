@@ -37,6 +37,20 @@ conn = connect(credentials=credentials)
 def run_query(query):
     rows = conn.execute(query, headers=1)
     rows = pd.DataFrame(rows.fetchall())
+
+    # Rename Position to Pos1
+    rows.rename(columns={"Position": "Pos1"}, inplace=True)
+
+    # Separate position by main and secondary
+    pos_vals = rows.Pos1.str.split(',', expand=True)
+
+    # Insert Pos2 next to Pos1
+    rows.insert(loc=6,
+                column='Pos2',
+                value=pos_vals[1])
+
+    rows.loc[:, 'Pos1'] = pos_vals[0]
+
     return rows
 
 
@@ -46,6 +60,8 @@ rows = run_query(f'SELECT * FROM "{sheet_url}"')
 # ----------------------------- DATA -------------------------------------------
 # Percentiles
 pizza = rows
+
+# fixtures.loc[:, 'Fecha'] = fixtures_date[0]
 pizza = pizza.reset_index(drop=True)
 
 # -------------------------------------- COMPONENTS ------------------------------
@@ -89,8 +105,8 @@ pizza.loc[:, rank_val] = rows[rank_val] / div
 col1, col2, col3 = st.columns(3)
 with col1:
     # FILTER BY POSITION
-    pos_val = st.multiselect('Choose position', rows['Position'].unique(), default=['DF'])
-    pizza = pizza[pizza['Position'].isin(pos_val)]
+    pos_val = st.multiselect('Choose position', rows['Pos1'].unique(), default=['DF'])
+    pizza = pizza[pizza['Pos1'].isin(pos_val)]
 
 with col2:
     # FILTER BY 90s
@@ -152,7 +168,7 @@ for i, stat in enumerate(stats):
 
     # Calculate rank from available players
     ranks_temp_df.loc[:, stat] = round(ranks_temp_df[stat].rank(pct=True) * 100, 2)
-    ranks_df.loc[:, stat] = round(ranks_temp_df[stat].rank(pct=True) * 100, 2)
+    ranks_df.loc[:, stat] = ranks_temp_df.loc[:, stat]
     # Store rank for selected player
     try:
         ranks_list.append(ranks_temp_df[stat][ranks_temp_df['Player'] == player].iloc[0])
@@ -210,7 +226,7 @@ fig_pizza, ax = baker.make_pizza(
 )
 
 # add credits
-CREDIT_1 = "data: statsbomb viz fbref"
+CREDIT_1 = "data: statsbomb via fbref"
 CREDIT_2 = "inspired by: @Worville, @FootballSlices, @somazerofc & @Soumyaj15209314"
 
 fig_pizza.text(
