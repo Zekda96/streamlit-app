@@ -19,6 +19,34 @@ def make_p90(dataframe, stat):
     return dataframe
 
 
+# ---------------------------- MAPPINGS --------------------------------------
+team_colours = {
+    'Arsenal': ['#EF0107', '#063672'],
+    'Aston Villa': ['#95BFE5', '#670E36'],
+    'Bournemouth': ['#DA291C', '#000000'],
+    'Brentford': ['#e30613', '#FFFFFF'],
+    'Brighton': ['#0057B8', '#FFCD00'],
+    'Burnley': ['#6C1D45', '#99D6EA'],
+    'Chelsea': ['#034694', '#034694'],
+    'Crystal Palace': ['#1B458F', '#A7A5A6'],
+    'Everton': ['#003399', '#FFFFFF'],
+    'Fulham': ['#000000', '#CC0000'],
+    'Leeds United': ['#FFCD00', '#1D428A'],
+    'Leicester City': ['#003090', '#FDBE11'],
+    'Liverpool': ['#C8102E', '#00B2A9'],
+    'Manchester Utd': ['#DA291C', '#FBE122'],
+    'Manchester City': ['#6CABDD', '#FFFFFF'],
+    'Newcastle Utd': ['#241F20', '#FFFFFF'],
+    'Norwhich City': ['#FFF200', '#00A650'],
+    'Nott\'ham Forest': ['#ff0000', '#ff0000'],
+    'Sheffield Utd': ['#EE2737', '#FFFFFF'],
+    'Southampton': ['#D71920', '#130C0E'],
+    'Tottenham': ['#132257', '#FFFFFF'],
+    'Watford': ['#FBEE23', '#ED2127'],
+    'West Ham': ['#7A263A', '#1BB1E7'],
+    'Wolves': ['#FDB913', '#231F20'],
+}
+
 # -------------------------------- DATA ---------------------------------------
 df = st.session_state['database']
 # ------------------------------- LAYOUT --------------------------------------
@@ -43,6 +71,14 @@ val_y = st.sidebar.selectbox(
     label='Choose value for y axis',
     options=df.columns.values[12:],
     index=int(np.where(df.columns.values[12:] == 'CarriesToFinalThird')[0][0])
+)
+
+# Selectbox to highlight team
+teams = st.sidebar.multiselect(
+    label='Highlight team',
+    options=df.team.unique(),
+    # default='',
+    # index=int(np.where(df.columns.values[12:] == 'CarriesToFinalThird')[0][0])
 )
 
 # Radio to select trendline or zones to scatterplot
@@ -86,12 +122,42 @@ fig = px.scatter(
     hover_name='player',
 )
 
+# TODO: LOOP FOR LIST OF TEAMS
+if teams:
+    for team in teams:
+        df1 = df[df['team'] == team]
+        fig = fig.add_scatter(
+            x=df1[val_x],
+            y=df1[val_y],
+            mode='markers',
+            name=team,
+            hovertext=df1.player.to_list(),
+            legendgroup=team,
+            # Styling
+            marker_size=12,
+            marker_color='white',
+            marker_line_color='red',
+            # marker_symbol='x',
+            # marker_opacity=0.5,
+            # opacity=0.5,
+        )
+
+
 fig = fig.update_traces(
     marker_size=10,
     marker_color='white',
-    marker_line_width=1,
+    marker_line_width=2,
     marker_line_color='blue',
 )
+
+if teams:
+    for team in teams:
+        fig = fig.update_traces(
+            selector={'legendgroup': team},
+            # marker_color='red',
+            marker_line_color=team_colours[team][1],
+            marker_color=team_colours[team][0],
+        )
 
 # Add Trend line or add zones
 if graph_trend == 'Trend line':
@@ -109,6 +175,7 @@ if graph_trend == 'Trend line':
             y=trend_y,
             showlegend=False,
             mode='lines',
+            line_color='blue',
         )
     )
 
