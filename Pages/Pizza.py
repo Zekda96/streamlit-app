@@ -291,7 +291,13 @@ leg_h = 0.92
 
 # add text
 fig_pizza.text(
-    0.24, leg_h, "Attacking       Playmaking       Possession       Defending",
+    0.24, leg_h, "Attacking"
+                 + "       "
+                 + "Playmaking"
+                 + "       "
+                 + "Possession"
+                 + "       "
+                 + "Defending",
     size=14,
     fontproperties=font_bold.prop, color="#F2F2F2"
 )
