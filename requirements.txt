@@ -1,5 +1,4 @@
 streamlit~=1.27.0
-gsheetsdb~=0.1.13.1
 mplsoccer~=1.2.1
 pandas~=2.1.0
 numpy~=1.26.0
