@@ -21,10 +21,10 @@ def make_p90(dataframe, stat):
 
 # ---------------------------- MAPPINGS --------------------------------------
 team_colours = {
-    'Arsenal': ['#EF0107', '#063672'],
+    'Arsenal': ['#FFFFFF', '#EF0107'], #063672
     'Aston Villa': ['#95BFE5', '#670E36'],
     'Bournemouth': ['#DA291C', '#000000'],
-    'Brentford': ['#e30613', '#FFFFFF'],
+    'Brentford': ['#FFFFFF', '#e30613'],
     'Brighton': ['#0057B8', '#FFCD00'],
     'Burnley': ['#6C1D45', '#99D6EA'],
     'Chelsea': ['#034694', '#034694'],
@@ -33,9 +33,9 @@ team_colours = {
     'Fulham': ['#000000', '#CC0000'],
     'Leeds United': ['#FFCD00', '#1D428A'],
     'Leicester City': ['#003090', '#FDBE11'],
-    'Liverpool': ['#C8102E', '#00B2A9'],
-    'Manchester Utd': ['#DA291C', '#FBE122'],
-    'Manchester City': ['#6CABDD', '#FFFFFF'],
+    'Liverpool': ['#ce1317', '#9a1310'],
+    'Manchester Utd': ['#000000', '#DA291C'],
+    'Manchester City': ['#6CABDD', '#6CABDD'],
     'Newcastle Utd': ['#241F20', '#FFFFFF'],
     'Norwhich City': ['#FFF200', '#00A650'],
     'Nott\'ham Forest': ['#ff0000', '#ff0000'],
@@ -96,6 +96,20 @@ if graph_trend == 'Zones':
         index=1,
     )
 
+# Player annotations
+st.sidebar.divider()
+st.sidebar.title('Player tags')
+
+players = st.sidebar.multiselect(
+    label='Highlight player',
+    options=df.player.unique(),
+    # default='',
+)
+
+
+a_c = st.sidebar.color_picker('Arrow Color', value='#FFFFFF')
+st.sidebar.title('Edit players\' tag')
+
 
 df = df[(df['90s'] >= z1) & (df['90s'] <= z2)]
 
@@ -113,16 +127,19 @@ st.subheader('Choose x and y pairs')
 df = make_p90(df, val_x)
 df = make_p90(df, val_y)
 
+df1 = df[~df['team'].isin(teams)]
+df1 = df1[~df['player'].isin(players)]
+
 fig = px.scatter(
-    df,
+    df1,
     x=val_x,
     y=val_y,
     # customdata=np.stack([df['player']]),
     # name=customdata[0],
     hover_name='player',
+    hover_data='team'
 )
 
-# TODO: LOOP FOR LIST OF TEAMS
 if teams:
     for team in teams:
         df1 = df[df['team'] == team]
@@ -145,9 +162,9 @@ if teams:
 
 fig = fig.update_traces(
     marker_size=10,
-    marker_color='white',
-    marker_line_width=2,
-    marker_line_color='blue',
+    marker_color='grey',
+    marker_line_width=1,
+    marker_line_color='#0A0A0A',
 )
 
 if teams:
@@ -157,7 +174,88 @@ if teams:
             # marker_color='red',
             marker_line_color=team_colours[team][1],
             marker_color=team_colours[team][0],
+            marker_line_width=2.5,
         )
+
+fig.update_layout(
+    paper_bgcolor="#050505",
+    plot_bgcolor='#131313',
+)
+
+# Create player annotations and add sidebar elements to edit each annotation
+if players:
+    for pl in players:
+
+        with st.sidebar.expander(pl):
+            ax = st.text_input(label='ax',
+                               value=45,
+                               key=f'{pl}_ax')
+
+            ay = st.text_input(label='ay',
+                               value=-30,
+                               key=f'{pl}_ay')
+
+            t = st.text_input(label='Text',
+                              value=pl,
+                              key=f'{pl}_text')
+
+            show_a = st.radio(label='Show arrow',
+                              options=[True, False],
+                              key=f'{pl}_show')
+            x_s = st.text_input(label='x shift',
+                                value=0,
+                                key=f'{pl}_xshift')
+            y_s = st.text_input(label='y shift',
+                                value=0,
+                                key=f'{pl}_yshift')
+            marker_c = st.color_picker(label='Marker Color',
+                                               value='#FFFFFF',
+                                               key=f'{pl}_mc')
+
+        dff = df[df['player'] == pl]
+        x = dff[val_x].values[0]
+        y = dff[val_y].values[0]
+
+        fig = fig.add_scatter(
+            x=dff[val_x],
+            y=dff[val_y],
+            mode='markers',
+            name=dff.team.values[0],
+            hovertext=dff.player.to_list(),
+            legendgroup=dff.team.values[0],
+            showlegend=False,
+            # Styling
+            marker_size=12,
+            marker_color=marker_c,
+            marker_line_color='red',
+            # marker_symbol='x',
+            # marker_opacity=0.5,
+            # opacity=0.5,
+        )
+
+        fig.add_annotation(
+            x=x,
+            y=y,
+            ax=ax,
+            ay=ay,
+            text=t,
+            arrowcolor=a_c,
+            arrowsize=0.3,
+            showarrow=show_a,
+            xshift=float(x_s),
+            yshift=float(y_s),
+        )
+#
+# # Test
+# fig.add_annotation(
+#     xref='paper',
+#     yref='paper',
+#     x=0.5,
+#     y=1,
+#     text=f"This is a test",
+#     # size=13,
+#     # ha="center", color="#F2F2F2"
+# )
 
 # Add Trend line or add zones
 if graph_trend == 'Trend line':
@@ -210,3 +308,9 @@ fig.update_layout(
 )
 
 st.plotly_chart(fig)
+
+st.divider()
+
+st.text('TO-DO\n'
+        '- Make stats PAdj\n')
+

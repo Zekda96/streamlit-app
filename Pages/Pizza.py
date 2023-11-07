@@ -1,6 +1,4 @@
 import streamlit as st
-import plotly.graph_objects as go
-import plotly.express as px
 import numpy as np
 import pandas as pd
 from mplsoccer import PyPizza, add_image, FontManager
@@ -336,3 +334,7 @@ ranks_debug = ranks_debug.merge(ranks_debug_atk, how='left')
 st.dataframe(ranks_debug[['player'] + stats_def + stats_poss + stats_atk])
 
 st.divider()
+
+st.text('TO-DO\n'
+        '- Make ranks per position (Pizza)\n'
+        '- Get Positions from TransferMarket\n')
