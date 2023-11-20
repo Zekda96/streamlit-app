@@ -4,6 +4,7 @@ import plotly.express as px
 import numpy as np
 import statsmodels.api as sm
 
+
 # ---------------------------- FUNCTIONS --------------------------------------
 
 
@@ -19,9 +20,68 @@ def make_p90(dataframe, stat):
     return dataframe
 
 
+def draw_zones(figure, dfr, xv, yv, hv, vv):
+    x_width = 0.05
+    y_width = 0.05
+    x_margin = (np.max(dfr[xv]) - np.min(dfr[xv])) * x_width
+    y_margin = (np.max(dfr[yv]) - np.min(dfr[yv])) * y_width
+
+    x_max = np.max(dfr[xv]) + x_margin
+    x_min = np.min(dfr[xv]) - x_margin
+    y_max = np.max(dfr[yv]) + y_margin
+    y_min = np.min(dfr[yv]) - y_margin
+
+    colors = ["LightSkyBlue", "red", "blue", "yellow"]
+
+    figure.add_shape(type="rect",
+                     xref="x",
+                     yref="y",
+                     x0=x_min,
+                     y0=hv,
+                     x1=vv,
+                     y1=y_max,
+                     fillcolor=colors[0],
+                     opacity=0.5,
+
+                     )
+
+    figure.add_shape(type="rect",
+                     xref="x",
+                     yref="y",
+                     x0=vv,
+                     y0=hv,
+                     x1=x_max,
+                     y1=y_max,
+                     fillcolor=colors[1],
+                     opacity=0.1
+                     )
+
+    figure.add_shape(type="rect",
+                     xref="x",
+                     yref="y",
+                     x0=x_min,
+                     y0=y_min,
+                     x1=vv,
+                     y1=hv,
+                     fillcolor=colors[2],
+                     opacity=0.1
+                     )
+
+    figure.add_shape(type="rect",
+                     xref="x",
+                     yref="y",
+                     x0=vv,
+                     y0=y_min,
+                     x1=x_max,
+                     y1=hv,
+                     fillcolor=colors[3],
+                     opacity=0.1
+                     )
+
+
 # ---------------------------- MAPPINGS --------------------------------------
 team_colours = {
-    'Arsenal': ['#FFFFFF', '#EF0107'], #063672
+    'Arsenal': ['#FFFFFF', '#EF0107'],  # 063672
     'Aston Villa': ['#95BFE5', '#670E36'],
     'Bournemouth': ['#DA291C', '#000000'],
     'Brentford': ['#FFFFFF', '#e30613'],
@@ -54,23 +114,49 @@ df = st.session_state['database']
 
 # Filter by 90s played
 z1, z2 = st.sidebar.select_slider(
-    'Select 90s',
+    'Filter by 90s',
     options=sorted(df['90s'].unique()),
     value=(np.median(df['90s'].unique()), np.max(df['90s'].unique()))
+)
+
+# positions = st.sidebar.multiselect(
+#     label='Positions',
+#     # options=['']
+# )
+
+# Choose predefined x/y pairs
+with st.sidebar.expander('Common Scatters'):
+    sc = st.radio(
+        label='Choose predefined scatter',
+        options=[
+            'Goalscoring Efficiency',
+            'Assisting Efficiency',
+            'Progressive Actions'
+        ],
+        index=0,
+    )
+if sc == 'Goalscoring Efficiency':
+    idx = 'npxG'
+    idy = 'npG-xG'
+elif sc == 'Assisting Efficiency':
+    idx = 'SCAPassLive'
+    idy = 'xAG'
+elif sc == 'Progressive Actions':
+    idx = 'ProgPasses'
+    idy = 'ProgCarries'
+
+# Selectbox to choose y value
+val_y = st.sidebar.selectbox(
+    label='Choose value for y axis',
+    options=df.columns.values[12:],
+    index=int(np.where(df.columns.values[12:] == idy)[0][0])
 )
 
 # Selectbox to choose x value
 val_x = st.sidebar.selectbox(
     label='Choose value for x axis',
     options=df.columns.values[12:],
-    index=int(np.where(df.columns.values[12:] == 'npxG')[0][0])
-)
-
-# Selectbox to choose y value
-val_y = st.sidebar.selectbox(
-    label='Choose value for y axis',
-    options=df.columns.values[12:],
-    index=int(np.where(df.columns.values[12:] == 'CarriesToFinalThird')[0][0])
+    index=int(np.where(df.columns.values[12:] == idx)[0][0])
 )
 
 # Selectbox to highlight team
@@ -78,14 +164,13 @@ teams = st.sidebar.multiselect(
     label='Highlight team',
     options=df.team.unique(),
     # default='',
-    # index=int(np.where(df.columns.values[12:] == 'CarriesToFinalThird')[0][0])
 )
 
 # Radio to select trendline or zones to scatterplot
 graph_trend = st.sidebar.radio(
     label='Add to plot',
-    options=['Trend line', 'Zones']
-
+    options=['Trend line', 'Zones'],
+    index=1,
 )
 
 # Selectbox to choose type of zone lines
@@ -96,9 +181,16 @@ if graph_trend == 'Zones':
         index=1,
     )
 
+# Format Graph properties
+st.sidebar.divider()
+st.sidebar.subheader('Format graph')
+
+graph_title = st.sidebar.text_input(label='Title',
+                                    value='X v Y')
+
 # Player annotations
 st.sidebar.divider()
-st.sidebar.title('Player tags')
+st.sidebar.subheader('Player tags')
 
 players = st.sidebar.multiselect(
     label='Highlight player',
@@ -106,10 +198,8 @@ players = st.sidebar.multiselect(
     # default='',
 )
 
-
 a_c = st.sidebar.color_picker('Arrow Color', value='#FFFFFF')
-st.sidebar.title('Edit players\' tag')
-
+st.sidebar.subheader('Edit players\' tag')
 
 df = df[(df['90s'] >= z1) & (df['90s'] <= z2)]
 
@@ -120,12 +210,15 @@ st.divider()
 
 st.subheader('Choose x and y pairs')
 
-
 # ------------------------------ Scatter 1 ------------------------------------
 # val_x = 'npxG'
 # val_y = 'CarriesToFinalThird'
 df = make_p90(df, val_x)
 df = make_p90(df, val_y)
+
+# fig = go.Figure()
+
+# Draw 'other' player markers
 
 df1 = df[~df['team'].isin(teams)]
 df1 = df1[~df['player'].isin(players)]
@@ -137,9 +230,31 @@ fig = px.scatter(
     # customdata=np.stack([df['player']]),
     # name=customdata[0],
     hover_name='player',
-    hover_data='team'
+    hover_data='team',
+    width=800, height=500,
 )
 
+fig.update_layout(
+    margin=dict(
+        # l=20,
+        r=40,
+        # t=20,
+        # b=20,
+    ),
+    paper_bgcolor="#050505",
+    plot_bgcolor='#131313',
+)
+
+# Update 'other players' markers
+fig.update_traces(
+    marker_size=10,
+    marker_color='grey',
+    marker_line_width=1,
+    opacity=1,
+    marker_line_color='#0A0A0A',
+)
+
+# Plot markers from highlighted teams
 if teams:
     for team in teams:
         df1 = df[df['team'] == team]
@@ -159,14 +274,7 @@ if teams:
             # opacity=0.5,
         )
 
-
-fig = fig.update_traces(
-    marker_size=10,
-    marker_color='grey',
-    marker_line_width=1,
-    marker_line_color='#0A0A0A',
-)
-
+# Update markers from highlighted teams
 if teams:
     for team in teams:
         fig = fig.update_traces(
@@ -177,15 +285,9 @@ if teams:
             marker_line_width=2.5,
         )
 
-fig.update_layout(
-    paper_bgcolor="#050505",
-    plot_bgcolor='#131313',
-)
-
-# Create player annotations and add sidebar elements to edit each annotation
+# Highlight players and add sidebar elements to edit each annotation
 if players:
     for pl in players:
-
         with st.sidebar.expander(pl):
             ax = st.text_input(label='ax',
                                value=45,
@@ -209,13 +311,15 @@ if players:
                                 value=0,
                                 key=f'{pl}_yshift')
             marker_c = st.color_picker(label='Marker Color',
-                                               value='#FFFFFF',
-                                               key=f'{pl}_mc')
+                                       value='#FFFFFF',
+                                       key=f'{pl}_mc')
 
+        # Create temporary dataset for highlighted player
         dff = df[df['player'] == pl]
         x = dff[val_x].values[0]
         y = dff[val_y].values[0]
 
+        # Add a marker for each player
         fig = fig.add_scatter(
             x=dff[val_x],
             y=dff[val_y],
@@ -245,17 +349,6 @@ if players:
             xshift=float(x_s),
             yshift=float(y_s),
         )
-#
-# # Test
-# fig.add_annotation(
-#     xref='paper',
-#     yref='paper',
-#     x=0.5,
-#     y=1,
-#     text=f"This is a test",
-#     # size=13,
-#     # ha="center", color="#F2F2F2"
-# )
 
 # Add Trend line or add zones
 if graph_trend == 'Trend line':
@@ -301,11 +394,15 @@ elif graph_trend == 'Zones':
         line_color="white"
     )
 
+    # Add zone color backgrounds
+    # draw_zones(fig, df, val_x, val_y, hline_val, vline_val)
+
 fig.update_layout(
-    title_text='Scatter plot',
+    title_text=graph_title,
     title_font_size=30,
     title_automargin=True,
 )
+
 
 st.plotly_chart(fig)
 
@@ -313,4 +410,3 @@ st.divider()
 
 st.text('TO-DO\n'
         '- Make stats PAdj\n')
-
