@@ -4,10 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ee2272f7-83d1-42c8-bcc1-15aee74f6627" name="Changes" comment="Added test barplot at the end">
+    <list default="true" id="ee2272f7-83d1-42c8-bcc1-15aee74f6627" name="Changes" comment="Chalkboard to show event data">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pages/4_Chalkboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/4_Chalkboard.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,15 +35,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;dev&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
-}</component>
-  <component name="RunManager" selected="Python.app">
-    <configuration name="app" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+}]]></component>
+  <component name="PyConsoleOptionsProvider">
+    <option name="myPythonConsoleState">
+      <console-settings>
+        <option name="useSoftWraps" value="true" />
+      </console-settings>
+    </option>
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.Homepage">
+    <configuration name="Homepage" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="streamlit-field-app" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -56,7 +67,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/app.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Homepage.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -109,7 +120,7 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.app" />
+        <item itemvalue="Python.Homepage" />
         <item itemvalue="Python.scrape_fb_ref_nat_team" />
         <item itemvalue="Python.query" />
       </list>
@@ -148,45 +159,136 @@
       <option name="project" value="LOCAL" />
       <updated>1695753910787</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Separated positions">
+      <created>1697555004628</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1697555004628</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Requirements">
+      <created>1697555057350</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1697555057350</updated>
+    </task>
+    <task id="LOCAL-00006" summary="updated names">
+      <created>1698706909544</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1698706909544</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Added scatter and divided plots into pages">
+      <created>1699278626416</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1699278626416</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Syntax">
+      <created>1699307423732</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1699307423732</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Syntax">
+      <created>1699307428714</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1699307428714</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Syntax">
+      <created>1699385537792</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1699385537792</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Added gitignore">
+      <created>1699385610706</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1699385610706</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Changed Pages to pages">
+      <created>1699386904267</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1699386904267</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Updated requirements.txt">
+      <created>1699386978063</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1699386978064</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Updated requirements.txt">
+      <created>1699387133660</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1699387133660</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Added config file">
+      <created>1699387345925</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1699387345925</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Added page order">
+      <created>1700511993642</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1700511993642</updated>
+    </task>
+    <task id="LOCAL-00017" summary="Added recommended stat pairs">
+      <created>1700512083427</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1700512083427</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Chalkboard to show event data">
+      <created>1700512102676</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1700512102676</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Hello World" />
     <MESSAGE value="Working dashboard w/ percentile ranks and pizza plot." />
     <MESSAGE value="Added test barplot at the end" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added test barplot at the end" />
+    <MESSAGE value="Separated positions" />
+    <MESSAGE value="Requirements" />
+    <MESSAGE value="updated names" />
+    <MESSAGE value="Added scatter and divided plots into pages" />
+    <MESSAGE value="Syntax" />
+    <MESSAGE value="Added gitignore" />
+    <MESSAGE value="Changed Pages to pages" />
+    <MESSAGE value="Updated requirements.txt" />
+    <MESSAGE value="Added config file" />
+    <MESSAGE value="Added page order" />
+    <MESSAGE value="Added recommended stat pairs" />
+    <MESSAGE value="Chalkboard to show event data" />
+    <option name="LAST_COMMIT_MESSAGE" value="Chalkboard to show event data" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/app.py</url>
-          <line>108</line>
-          <option name="timeStamp" value="25" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/app.py</url>
-          <line>61</line>
-          <option name="timeStamp" value="26" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/app.py</url>
-          <line>41</line>
-          <option name="timeStamp" value="28" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
-        <watch expression="rows" />
-        <watch expression="ranks_df" />
-        <watch expression="stats" />
-        <watch expression="stat" />
-        <watch expression="ranks_list" language="Python" />
-        <watch expression="ranks_df[stat][ranks_df['Player'] == player].iloc[0]" language="Python" />
-        <watch expression="player" language="Python" />
-        <watch expression="rows.Position.str.split(',', expand=True)[0]" language="Python" />
+        <watch expression="ranks_debug_def.merge(ranks_debug_poss, how='left').merge(ranks_debug_atk, how='left')" language="Python" />
       </configuration>
     </watches-manager>
   </component>
