@@ -297,6 +297,7 @@ st.divider()
 image_url = 'https://cdn5.wyscout.com/photos/team/public/25_120x120.png'
 
 # Figure
+margin1 = 7
 # Pitch Padding
 pitch_left_pad = 0
 pitch_right_pad = 0
@@ -531,6 +532,21 @@ with tab_one:
         # Pitch background color
         axs['pitch'].set_facecolor(pitch_bg_color)
 
+        # Add invisible text to add margins
+        axs['pitch'].text(
+            x=-margin1,
+            y=60,
+            s='o',
+            # c=fig_bg_color,
+            c='red',
+        )
+        axs['pitch'].text(
+            x=80+margin1,
+            y=60,
+            s='o',
+            c=fig_bg_color,
+        )
+
         # Add title
         axs['title'].text(
             x=title_x,
@@ -667,16 +683,16 @@ with tab_one:
         )
 
         # ------------ Add Credits
-        axs['pitch'].text(
-            79,
-            119,
+        axs['title'].text(
+            1,
+            .95,
             '@DGCFutbol',
             va='top',
             ha='right',
             fontsize=13,
             weight='bold',
             # ontproperties=robotto_regular.prop,
-            color='#030303',
+            color=event1_marker_color1,
             alpha=0.3,
         )
 
