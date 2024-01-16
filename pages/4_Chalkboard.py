@@ -294,8 +294,7 @@ st.divider()
 # ------------------------------ FORMAT PLOT ----------------------------------
 # -------------------------- EDIT/CHANGE PARAMETERS
 
-image_url = 'https://cdn5.wyscout.com/photos/team/public/25_120x120.png'
-
+image_path = 'images/nu.png'
 # Figure
 margin1 = 7
 # Pitch Padding
@@ -369,7 +368,13 @@ pitch_line_color = '#03191E'
 pitch_bg_color = '#faf9f4'
 
 # Events
-event1_marker_color1 = '#0b4393'
+# event1_marker_color1 = '#0b4393'  # chelsea
+# event1_marker_color1 = '#de0011'  # MUTD
+# event1_marker_color1 = "#f30022"  # Liverpool
+# event1_marker_color1 = "#db0007"  # Arsenal
+# event1_marker_color1 = '#0f1f4a'  # Tottenham
+# event1_marker_color1 = '#650334'  #Aston Villa
+event1_marker_color1 = '#231f20'
 event2_marker_color1 = '#B5B4B2'
 event_line_width1 = 1.8
 
@@ -788,7 +793,7 @@ with tab_two:
         )
 
         # Add team logo
-        image = Image.open(urlopen(image_url))
+        image = Image.open(image_path)
         newax = fig2.add_axes([0, 0.855, 0.111, 0.111], anchor='W', zorder=1)
         newax.imshow(image)
         newax.axis('off')
