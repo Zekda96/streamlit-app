@@ -5,9 +5,9 @@ from mplsoccer import PyPizza, add_image, FontManager
 import matplotlib.pyplot as plt
 
 # Load fonts
-font_normal = FontManager('https://raw.githubusercontent.com/google/fonts/main/apache/roboto/'
+font_normal = FontManager('https://raw.githubusercontent.com/google/fonts/main/ofl/roboto/'
                           'Roboto%5Bwdth,wght%5D.ttf')
-font_italic = FontManager('https://raw.githubusercontent.com/google/fonts/main/apache/roboto/'
+font_italic = FontManager('https://raw.githubusercontent.com/google/fonts/main/ofl/roboto/'
                           'Roboto-Italic%5Bwdth,wght%5D.ttf')
 font_bold = FontManager('https://raw.githubusercontent.com/google/fonts/main/apache/robotoslab/'
                         'RobotoSlab%5Bwght%5D.ttf')
