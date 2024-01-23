@@ -214,11 +214,11 @@ st.sidebar.subheader('Edit players\' tag')
 
 # --------------------------------------------------------------------- Content
 st.header(':soccer: Scatter Plot Interactivo')
-st.subheader('Perfil de Juego y Analisis de Rendimiento')
+st.subheader('Perfil de Juego y Análisis de Rendimiento')
 
 st.divider()
 
-st.write('Un scatter plot permite una comparacion a base de 2 variables, '
+st.write('Un scatter plot permite una comparación a base de 2 variables, '
          'las cuales pueden ser complementarias, para analizar '
          'rendimiento, o pueden ser divergentes, para analizar '
          'estilo de juego.\n\n'
@@ -238,7 +238,7 @@ st.write('**1. Eficiencia Goleadora** muestras 2 variables complementarias: '
          'un jugador, mas peligro de gol ha generado con sus tiros, y '
          'mientras '
          'mas arriba este un jugador, mas eficiente es convirtiendo '
-         'en gol los tiros que ha hecho. Entonces, fijandonos en la '
+         'en gol los tiros que ha hecho. Entonces, fijándonos en la '
          'esquina superior derecha podremos encontrar a los jugadores '
          'con mejor eficiencia goleadora como: **Haaland**, **Rashford** '
          'y **Kane**.\n\n')
@@ -248,21 +248,21 @@ st.write('**2. Eficiencia para Asistir** muestra 2 variables complementarias: '
          'Mientras mas arriba este un jugador, ha dado pases con mayor '
          'peligro de gol. Mientras que mas a la derecha este un '
          'jugador, ha creado un volumen mas alto de tiros con sus pases. '
-         'Fijandonos en la esquina superior derecha podemos destacar a los '
+         'Fijándonos en la esquina superior derecha podemos destacar a los '
          'jugadores que mayor peligro de gol han creado con sus pases como: '
          '**Kevin De Bruyne** y **Bruno Fernandes**.')
 
 st.write(
          '**3. Acciones Progresivas** muestra 2 variables divergentes: '
-         '*Y: Progresion con Drible* y *X: Progresion con Pase*. De '
+         '*Y: Progresión con Drible* y *X: Progresión con Pase*. De '
          'esta manera podemos encontrar jugadores que destaquen '
-         'particularmente en *Progresion por drible* en el cuadrante '
+         'particularmente en *Progresión por drible* en el cuadrante '
          'superior izquierdo, como **Grealish, Saka y Mitoma**. Se pueden '
          'encontrar jugadores que destaquen particularmente en '
-         '*Progresion por Pases* en el cuadrante inferior derecho, tales como '
+         '*Progresión por Pases* en el cuadrante inferior derecho, tales como '
          '**Enzo Fernandez, Alexander-Arnold y Eriksen.** '
          'Y en el cuadrante superior derecho se pueden encontrar los '
-         'jugadores singulares que estan por sobre la media en ambas como: '
+         'jugadores singulares que están por sobre la media en ambas como: '
          '**Kevin De Bruyne**.'
 )
 
