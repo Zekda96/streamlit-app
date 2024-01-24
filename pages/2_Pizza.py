@@ -5,9 +5,9 @@ from mplsoccer import PyPizza, add_image, FontManager
 import matplotlib.pyplot as plt
 
 # Load fonts
-font_normal = FontManager('https://raw.githubusercontent.com/google/fonts/main/apache/roboto/'
+font_normal = FontManager('https://raw.githubusercontent.com/google/fonts/main/ofl/roboto/'
                           'Roboto%5Bwdth,wght%5D.ttf')
-font_italic = FontManager('https://raw.githubusercontent.com/google/fonts/main/apache/roboto/'
+font_italic = FontManager('https://raw.githubusercontent.com/google/fonts/main/ofl/roboto/'
                           'Roboto-Italic%5Bwdth,wght%5D.ttf')
 font_bold = FontManager('https://raw.githubusercontent.com/google/fonts/main/apache/robotoslab/'
                         'RobotoSlab%5Bwght%5D.ttf')
@@ -16,6 +16,7 @@ green = '#2ba02b'
 red = '#d70232'
 yellow = '#ff9300'
 blue = '#1a78cf'
+
 
 # --------------------------------- FUNCTIONS ---------------------------------
 def map_stat_labels(labels_list):
@@ -75,24 +76,41 @@ ranked_vals = rv_df.select_dtypes(include=np.number).columns.tolist()
 
 # ------------------------ Page config ----------------------------------------
 st.set_page_config(
-    page_title='Data Analysis',
+    page_title='Análisis de Datos',
     page_icon=':soccer:'
 )
 
 # ------------------------- RANK PIZZA PLOT ------------------------------
-st.subheader('Rank bar plot')
+st.header('Pizza Charts: Análisis de Rendimiento')
+st.write('##### Premier League 22/23')
+
+st.divider()
+
+s = '\nLos Pizza Charts comparan a un jugador con el resto de jugadores del ' \
+    'torneo y dan una puntuación de 0 a 100 en distintas meétricas ' \
+    'y asi permiten explorar el desempeño completo del ' \
+    'jugador.\n\n' \
+    'Las métricas se dividen en Ataque, Creación de Juego, Posesión y ' \
+    'Defensa. Mientras mas llena la barra, mas alta la calificación.'
+st.write(s)
+
+s = '1. Elegir equipo\n' \
+    '2. Elegir jugador\n' \
+    '3. *Opcional: Puede seleccionar la pestaña de cada categoría y editar ' \
+    'las métricas.*'
+st.write(s)
 
 # Tabs for stats select
-tab_def, tab_poss, tab_pmk, tab_atk = st.tabs(["Defense",
-                                               "Possession",
-                                               "Playmaking",
-                                               "Attack"
+tab_def, tab_poss, tab_pmk, tab_atk = st.tabs(["Defensa",
+                                               "Posesión",
+                                               "Creación de Juego",
+                                               "Ataque"
                                                ]
                                               )
 
 with tab_def:
     # Choose defense stats for pizza plot
-    with st.expander('Advanced Settings'):
+    with st.expander('Editar métricas'):
         stats_def = st.multiselect(
             'Choose stats',
             ranked_vals,
@@ -107,7 +125,7 @@ with tab_def:
 
 with tab_poss:
     # Choose possession stats for pizza plot
-    with st.expander('Advanced Settings'):
+    with st.expander('Editar métricas'):
         stats_poss = st.multiselect(
             'Choose stats',
             ranked_vals,
@@ -122,7 +140,7 @@ with tab_poss:
 
 with tab_pmk:
     # Choose playmaking stats for pizza plot
-    with st.expander('Advanced Settings'):
+    with st.expander('Editar métricas'):
         stats_pmk = st.multiselect(
             'Choose stats',
             ranked_vals,
@@ -137,7 +155,7 @@ with tab_pmk:
 
 with tab_atk:
     # Choose possession stats for pizza plot
-    with st.expander('Advanced Settings'):
+    with st.expander('Editar métricas'):
         stats_atk = st.multiselect(
             'Choose stats',
             ranked_vals,
@@ -156,7 +174,7 @@ with col1:
     # Filter by team
     teams = pizza_rank.team.unique()
     team = st.selectbox(
-        label='Choose Team',
+        label='Elegir Equipo',
         options=pizza_rank.team.unique(),
         index=int(np.where(teams == 'Manchester City')[0][0]),
     )
@@ -166,9 +184,9 @@ with col2:
     # Filter by player
     players_from_team = pizza_rank[pizza_rank['team'] == team].player
     player = st.selectbox(
-        label='Choose Player',
+        label='Elegir Jugador',
         options=players_from_team,
-        index=int(np.where(players_from_team == 'Rodri')[0][0]),
+        index=10,
         # index=18,
     )
     # Player is filtered after calculating ranks
@@ -269,6 +287,11 @@ fig_pizza.text(
     ha="left"
 )
 
+# Add margin
+fig_pizza.text(
+    1, 0, "o", alpha=0
+)
+
 # Add title
 fig_pizza.text(
     0.515, 0.975, f"{player} - {team}", size=16,
@@ -279,23 +302,24 @@ fig_pizza.text(
 league = 'Premier League'
 season = '22-23'
 fig_pizza.text(
-    0.515, 0.95,
+    0.515, 0.9475,
     f"Percentile Rank vs {league} Midfielders | Season {season}",
     size=13,
     ha="center", fontproperties=font_bold.prop, color="#F2F2F2"
 )
 
-leg_h = 0.92
+leg_h = 0.915
+y_diff = 0.003
 
 # add text
 fig_pizza.text(
-    0.24, leg_h, "Attacking"
-                 + "       "
-                 + "Playmaking"
-                 + "       "
-                 + "Possession"
-                 + "       "
-                 + "Defending",
+    0.2, leg_h, "Ataque"
+                 + "         "
+                 + "Creación de Juego"
+                 + "          "
+                 + "Posesión"
+                 + "          "
+                 + "Defensa",
     size=14,
     fontproperties=font_bold.prop, color="#F2F2F2"
 )
@@ -303,19 +327,19 @@ fig_pizza.text(
 # add rectangles
 fig_pizza.patches.extend([
     plt.Rectangle(
-        (0.205, leg_h), 0.025, 0.021, fill=True, color=red,
+        (0.17, leg_h-y_diff), 0.025, 0.021, fill=True, color=red,
         transform=fig_pizza.transFigure, figure=fig_pizza
     ),
     plt.Rectangle(
-        (0.365, leg_h), 0.025, 0.021, fill=True, color=green,
+        (0.305, leg_h-y_diff), 0.025, 0.021, fill=True, color=green,
         transform=fig_pizza.transFigure, figure=fig_pizza
     ),
     plt.Rectangle(
-        (0.545, leg_h), 0.025, 0.021, fill=True, color=yellow,
+        (0.572, leg_h-y_diff), 0.025, 0.021, fill=True, color=yellow,
         transform=fig_pizza.transFigure, figure=fig_pizza
     ),
     plt.Rectangle(
-        (0.715, leg_h), 0.025, 0.021, fill=True, color=blue,
+        (0.734, leg_h-y_diff), 0.025, 0.021, fill=True, color=blue,
         transform=fig_pizza.transFigure, figure=fig_pizza
     ),
 ])

@@ -109,6 +109,12 @@ team_colours = {
 
 # -------------------------------- DATA ---------------------------------------
 df = st.session_state['database']
+
+# ------------------------ Page config ----------------------------------------
+st.set_page_config(
+    page_title='Análisis de Datos',
+    page_icon=':soccer:'
+)
 # ------------------------------- LAYOUT --------------------------------------
 # ------------------------------ Sidebar
 
@@ -119,29 +125,32 @@ z1, z2 = st.sidebar.select_slider(
     value=(np.median(df['90s'].unique()), np.max(df['90s'].unique()))
 )
 
+df = df[(df['90s'] >= z1) & (df['90s'] <= z2)]
+
+
 # positions = st.sidebar.multiselect(
 #     label='Positions',
 #     # options=['']
 # )
 
 # Choose predefined x/y pairs
-with st.sidebar.expander('Common Scatters'):
+with st.sidebar.expander('Ejemplos'):
     sc = st.radio(
-        label='Choose predefined scatter',
+        label='Elegir scatter predeterminado',
         options=[
-            'Goalscoring Efficiency',
-            'Assisting Efficiency',
-            'Progressive Actions'
+            'Eficiencia Goleadora',
+            'Eficiencia para Asistir',
+            'Acciones Progresivas'
         ],
         index=0,
     )
-if sc == 'Goalscoring Efficiency':
+if sc == 'Eficiencia Goleadora':
     idx = 'npxG'
     idy = 'npG-xG'
-elif sc == 'Assisting Efficiency':
+elif sc == 'Eficiencia para Asistir':
     idx = 'SCAPassLive'
     idy = 'xAG'
-elif sc == 'Progressive Actions':
+elif sc == 'Acciones Progresivas':
     idx = 'ProgPasses'
     idy = 'ProgCarries'
 
@@ -163,7 +172,7 @@ val_x = st.sidebar.selectbox(
 teams = st.sidebar.multiselect(
     label='Highlight team',
     options=df.team.unique(),
-    # default='',
+    default=['Manchester City', 'Manchester Utd', 'Chelsea'],
 )
 
 # Radio to select trendline or zones to scatterplot
@@ -186,7 +195,7 @@ st.sidebar.divider()
 st.sidebar.subheader('Format graph')
 
 graph_title = st.sidebar.text_input(label='Title',
-                                    value='X v Y')
+                                    value='Scatter plot - Premier League 22/23')
 
 # Player annotations
 st.sidebar.divider()
@@ -195,20 +204,69 @@ st.sidebar.subheader('Player tags')
 players = st.sidebar.multiselect(
     label='Highlight player',
     options=df.player.unique(),
-    # default='',
+    default=['Erling Haaland', 'Kevin De Bruyne',
+             'Marcus Rashford', 'Enzo Fernández'],
 )
 
 a_c = st.sidebar.color_picker('Arrow Color', value='#FFFFFF')
 st.sidebar.subheader('Edit players\' tag')
 
-df = df[(df['90s'] >= z1) & (df['90s'] <= z2)]
 
-# ------------------------------ Content
-st.header(':soccer: Scatter plots')
+# --------------------------------------------------------------------- Content
+st.header(':soccer: Scatter Plot Interactivo')
+st.subheader('Perfil de Juego y Análisis de Rendimiento')
 
 st.divider()
 
-st.subheader('Choose x and y pairs')
+st.write('Un scatter plot permite una comparación a base de 2 variables, '
+         'las cuales pueden ser complementarias, para analizar '
+         'rendimiento, o pueden ser divergentes, para analizar '
+         'estilo de juego.\n\n'
+         
+         'Este grafico es interactivo asi que puede pasar el mouse '
+         'encima de los puntos para ver el nombre del jugador.\n\n'
+         )
+
+st.divider()
+
+st.write(
+         'Para empezar podemos seleccionar una de las 3 opciones en la '
+         'pestaña "Ejemplos" ubicada a la izquierda.\n\n')
+st.write('**1. Eficiencia Goleadora** muestras 2 variables complementarias: '
+         '*Y-Diferencia entre Goles y Goles esperados* y *X-Goles '
+         'esperados sin penales*. Mientras mas a la derecha se encuentre '
+         'un jugador, mas peligro de gol ha generado con sus tiros, y '
+         'mientras '
+         'mas arriba este un jugador, mas eficiente es convirtiendo '
+         'en gol los tiros que ha hecho. Entonces, fijándonos en la '
+         'esquina superior derecha podremos encontrar a los jugadores '
+         'con mejor eficiencia goleadora como: **Haaland**, **Rashford** '
+         'y **Kane**.\n\n')
+
+st.write('**2. Eficiencia para Asistir** muestra 2 variables complementarias: '
+         '*Y-Goles Asistidos Esperados* y *X-Pases que crearon Tiros*. '
+         'Mientras mas arriba este un jugador, ha dado pases con mayor '
+         'peligro de gol. Mientras que mas a la derecha este un '
+         'jugador, ha creado un volumen mas alto de tiros con sus pases. '
+         'Fijándonos en la esquina superior derecha podemos destacar a los '
+         'jugadores que mayor peligro de gol han creado con sus pases como: '
+         '**Kevin De Bruyne** y **Bruno Fernandes**.')
+
+st.write(
+         '**3. Acciones Progresivas** muestra 2 variables divergentes: '
+         '*Y: Progresión con Drible* y *X: Progresión con Pase*. De '
+         'esta manera podemos encontrar jugadores que destaquen '
+         'particularmente en *Progresión por drible* en el cuadrante '
+         'superior izquierdo, como **Grealish, Saka y Mitoma**. Se pueden '
+         'encontrar jugadores que destaquen particularmente en '
+         '*Progresión por Pases* en el cuadrante inferior derecho, tales como '
+         '**Enzo Fernandez, Alexander-Arnold y Eriksen.** '
+         'Y en el cuadrante superior derecho se pueden encontrar los '
+         'jugadores singulares que están por sobre la media en ambas como: '
+         '**Kevin De Bruyne**.'
+)
+
+st.divider()
 
 # ------------------------------ Scatter 1 ------------------------------------
 # val_x = 'npxG'
@@ -405,6 +463,16 @@ fig.update_layout(
 
 
 st.plotly_chart(fig)
+
+
+st.write('Configuraciones:\n\n'
+         '1. Elegir valores de x/y o elegir un ejemplo predeterminado.\n'
+         '2. *Opcional: Elegir un equipo para resaltar sus jugadores.*\n'
+         '3. Cambiar entre cuadrantes o agregar una linea de tendencia\n'
+         '4. Cambiar titulo del grafico\n'
+         '5. Elegir jugadores a resaltar\n'
+         '6. Editar aspectos visuales de los tags de cada jugador'
+         )
 
 st.divider()
 
