@@ -9,6 +9,7 @@ st.set_page_config(
 
 )
 
+
 @st.cache_data()
 def read_csv(link):
     return pd.read_csv(link)
@@ -34,6 +35,11 @@ pizza = pizza.reset_index(drop=True)
 # Content
 st.header('Daniel Granja C.')
 st.subheader('Análisis y Visualización de Datos :soccer:')
+
+st.write('[[Twitter]](https://twitter.com/DGCFutbol) '
+         '[[Instagram]](https://instagram.com/DGCFutbol) '
+         '[[Github]](https://github.com/Zekda96) '
+         )
 
 st.divider()
 
