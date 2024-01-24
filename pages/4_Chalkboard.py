@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.image as mpimg
 from mplsoccer import Pitch, VerticalPitch, Standardizer
+from matplotlib.patches import FancyArrow
 
 import io
 import matplotlib.pyplot as plt
@@ -94,9 +95,15 @@ def plot_attacking(ax):
 # Standardizer
 standard = Standardizer(pitch_from='opta', pitch_to='statsbomb')
 
-# -------------------------------- LOAD DATA ----------------------------------
+# ------------------------------------------------------------------ LOAD DATA
 df = pd.read_csv('data/2324_events.csv')
 df = df.iloc[:, 1:]
+
+# ---------------------------------------------------------------- Page config
+st.set_page_config(
+    page_title='Análisis de Datos',
+    page_icon=':soccer:'
+)
 
 # ------------------------------- DASHBOARD  ----------------------------------
 # ---------------------------- SIDEBAR FILTERS --------------------------------
@@ -112,7 +119,7 @@ team = st.sidebar.selectbox(
 players = st.sidebar.multiselect(
     label='Select players',
     options=df[df['team'] == team].player.dropna().sort_values().unique(),
-    default=df[df['team'] == team].player.dropna().sort_values().unique()[10],
+    default=df[df['team'] == team].player.dropna().sort_values().unique()[16],
 )
 
 # Filter by actions against opposing team
@@ -124,7 +131,7 @@ rivals_opt.sort()
 rivals = st.sidebar.multiselect(
     label='Select rivals',
     options=rivals_opt,
-    # default=['Liverpool']
+    default=['Burnley']
 )
 
 # Filter by type of event
@@ -137,7 +144,8 @@ event = st.sidebar.selectbox(
 if event == 'Pass':
     # Granular filter by pitch length
     l1, l2 = st.sidebar.select_slider(
-        label='Select Pass Length (m)',
+        # label='Select Pass Length (m)',
+        label='Seleccionar Distancia de Pase (metros)',
         # Not eliminating the NAN messed up the sorting
         options=sorted(df[df['length'].notna()].loc[:, 'length'].unique()),
         # options=sorted(df['length'].unique()),
@@ -150,30 +158,34 @@ if event == 'Pass':
 
 # Filter by Starting Pitch Zone
 x1, x2 = st.sidebar.select_slider(
-    'Filter by Starting Pitch Zone',
+    # 'Filter by Starting Pitch Zone',
+    'Zona de Inicio del pase',
     options=('Start', '1/3', '2/3', 'End'),
-    value=('Start', '2/3'),
+    value=('Start', 'End'),
 )
 x1 = replace_thirds(x1)
 x2 = replace_thirds(x2)
 
 # Filter by Receiving Pitch Zone
 end_x1, end_x2 = st.sidebar.select_slider(
-    'Filter by Receiving Pitch Zone',
+    # 'Filter by Receiving Pitch Zone',
+    'Zona de Recepcion del Pase',
     options=('Start', '1/3', '2/3', 'End'),
-    value=('2/3', 'End'),
+    value=('Start', 'End'),
 )
 end_x1 = replace_thirds(end_x1)
 end_x2 = replace_thirds(end_x2)
 
 if len(players) > 0:
     title_text = st.sidebar.text_input(
-        label='Figure Title',
+        # label='Figure Title',
+        label='Titulo de Figura 1',
         value=f'{players[0]} Passes'
     )
 
 title_text2 = st.sidebar.text_input(
-    label='2nd Figure Title',
+    # label='2nd Figure Title',
+    label='Titulo de Figura 2',
     value=f'{team} Passes Into Final Third'
 )
 # ------------------------------ FILTER DATA ----------------------------------
@@ -266,43 +278,83 @@ top = top.sort_values(by=['type'], ascending=False).head()
 # font_bold = FontManager('https://raw.githubusercontent.com/google/fonts/
 # main/apache/robotoslab/RobotoSlab%5Bwght%5D.ttf')
 
-st.title('Chalkboard')
-st.subheader('Type of Passes')
+st.title('Chalkboard :soccer:')
+st.subheader('Creacion de mapas de pases')
+st.write('Premier League 23/24 - 12 Fechas')
+
+st.divider()
+st.write('Instrucciones:\n'
+         '1. Selecciona un Equipo\n'
+         '2. Selecciona un Jugador\n'
+         '3. Selecciona uno o mas rivales.\n\n'
+         'Con esto, el Mapa de Pases del jugador que elegiste ya debería '
+         'estar listo mas abajo.'
+         )
 
 st.divider()
 
-col1, col2 = st.columns(2)
+st.write(
+         'Aquí hay un desglose de los pases de los jugadores seleccionados, y '
+         'abajo se destacan los jugadores del equipo seleccionado que mas '
+         'pases dieron. Podrían ser de interés.\n'
+        )
 
 # Count
-with col1:
-    st.text(
-        f'Team passes: {team_events}\n'
-        f'Successful: {scc_team}\n'
-        f'Unsuccessful: {fail_team}\n'
+
+# st.text(
+#     f'Pases del Equipo: {team_events}\n'
+#     f'Completos: {scc_team}\n'
+#     f'Fallados: {fail_team}\n'
+# )
+
+passes_df = [
+    {'Player': team,
+     'Pases Totales': team_events,
+     'Completados': scc_team,
+     'Fallados': fail_team,
+     'Precision (%)': round(scc_team/team_events * 100, 1)}
+
+]
+
+for i, pl in enumerate(players):
+    # st.text(
+    #     f'{pl}: {player_events[pl]} ({p[pl]}% de pases del equipo)\n'
+    #     f'Completos: {scc_player[pl]} ({player_cmp[pl]}% precision)\n'
+    #     f'Fallados: {fail_player[pl]}'
+    # )
+    passes_df.append(
+        {'Player': pl,
+         'Pases Totales': player_events[pl],
+         'Completados': scc_player[pl],
+         'Fallados': fail_player[pl],
+         'Precision (%)': player_cmp[pl]
+         }
     )
-    for i, pl in enumerate(players):
-        st.text(
-            f'{pl}: {player_events[pl]} ({p[pl]}% of team)\n'
-            f'Successful: {scc_player[pl]} ({player_cmp[pl]}% comp. rate)\n'
-            f'Unsuccessful: {fail_player[pl]}'
-        )
-with col2:
-    st.dataframe(top)
+
+st.write(pd.DataFrame(passes_df))
+
+st.write(top)
 
 st.divider()
+
+st.write('Instrucciones adicionales:\n\n'
+         'Puedes cambiar los filtros de la barra lateral para mayor '
+         'exploración de datos. Por ejemplo, puedes seleccionar solo 3 '
+         'jugadores (quizás los 3 que mas pases dieron?) y seleccionar '
+         'la pestana "Tres Jugadores".')
 
 # ------------------------------ FORMAT PLOT ----------------------------------
 # -------------------------- EDIT/CHANGE PARAMETERS
 
-image_path = 'images/nu.png'
+image_path = 'images/ch.png'
 # Figure
-margin1 = 7
+margin1 = 5
 # Pitch Padding
 pitch_left_pad = 0
 pitch_right_pad = 0
 pitch_top_ad = 0
-# pitch_bottom_pad = 0
-pitch_bottom_pad = -35
+pitch_bottom_pad = 0
+# pitch_bottom_pad = -35
 
 # Figure Background Color
 fig_bg_color = '#faf9f4'
@@ -323,7 +375,7 @@ grid_space = 0
 
 title_h = 0.1  # the title takes up 15% of the fig height
 grid_h = 0.7  # the grid takes up 71.5% of the figure height
-endnote_h = 0  # endnote takes up 6.5% of the figure height
+endnote_h = 0.1  # endnote takes up 6.5% of the figure height
 
 grid_w = 0.5  # grid takes up 95% of the figure width
 left_p = 0.1
@@ -368,13 +420,13 @@ pitch_line_color = '#03191E'
 pitch_bg_color = '#faf9f4'
 
 # Events
-# event1_marker_color1 = '#0b4393'  # chelsea
+event1_marker_color1 = '#0b4393'  # chelsea
 # event1_marker_color1 = '#de0011'  # MUTD
 # event1_marker_color1 = "#f30022"  # Liverpool
 # event1_marker_color1 = "#db0007"  # Arsenal
 # event1_marker_color1 = '#0f1f4a'  # Tottenham
 # event1_marker_color1 = '#650334'  #Aston Villa
-event1_marker_color1 = '#231f20'
+# event1_marker_color1 = '#231f20'
 event2_marker_color1 = '#B5B4B2'
 event_line_width1 = 1.8
 
@@ -386,10 +438,12 @@ line_alpha_end = 1
 
 # Legend
 legend_ref = 'lower center'
-legend_loc = (0.5, 0)  # Loc. of the lower center of the Legend
+legend_loc = (0.5, -0.22)  # Loc. of the lower center of the Legend
 if len(players) > 0:  # To avoid error messages when no player is selected yet
-    label1 = f'Completed passes = {scc_player[players[0]]}'
-    label2 = f'Missed passes = {player_events[players[0]] - scc_player[players[0]]}'
+    # label1 = f'{scc_player[players[0]]} Completed passes'
+    label1 = f'{scc_player[players[0]]} Completados'
+    # label2 = f'{player_events[players[0]] - scc_player[players[0]]} Missed passes'
+    label2 = f'{player_events[players[0]] - scc_player[players[0]]} Fallados'
 
 legend_bg_color = 'white'
 legend_edge_color = 'black'
@@ -465,18 +519,25 @@ line_alpha_end2 = 0.3
 # ----------------------------- SETUP FIGURE
 
 # Tabs for stats select
-tab_one, tab_two, tab_three, tab_four = st.tabs([
-    "One Player",
-    "Three Players",
-    "Inside Final 3rd",
-    "Team Attack Contribution",
+# tab_one, tab_two, tab_four = st.tabs([
+#     "One Un Jugador",
+#     "Tres Jugadores",
+#     "En Desarrollo...",
+# ]
+# )
+
+tab_one, tab_two = st.tabs([
+    "Un Jugador",
+    "Tres Jugadores"
 ]
 )
 with tab_one:
-    if len(players) == 0:
-        st.caption('This viz requires at least 1 player selected.')
+    if len(players) != 1:
+        # st.caption('This viz requires only 1 player selected.')
+        st.caption('Selecciona solo 1 jugador.')
+
     else:
-        pitch = VerticalPitch(
+        pitch = Pitch(
             # axis=True,
             # label=True,
             # tick=True,
@@ -497,7 +558,7 @@ with tab_one:
 
         fig, axs = pitch.grid(
             nrows=1, ncols=1,
-            # figheight=10,
+            figheight=7,
 
             title_height=title_h,  # the title takes up 15% of the fig height
             grid_height=grid_h,  # the grid takes up 71.5% of the figure height
@@ -520,17 +581,33 @@ with tab_one:
         )
 
         # ------------ Add 3rds Lines
-        y, _ = standard.transform([1 / 3 * 100, 2 / 3 * 100], [0, 0])
+        x, _ = standard.transform([1 / 3 * 100, 2 / 3 * 100], [0, 0])
 
-        axs['pitch'].hlines(
-            y=y,
-            xmin=-3,
-            xmax=83,
+        axs['pitch'].vlines(
+            x=x,
+            ymin=-1,
+            ymax=81,
             colors='black',
             linestyles='dashed',
             alpha=0.5,
             clip_on=False,
         )
+
+        # Add 'Direction of Play' Arrow
+        l1 = FancyArrow(x=0.2, y=0.1, dx=0.3, dy=0,
+                        transform=fig.transFigure, figure=fig,
+                        length_includes_head=True,
+                        head_length=0.01,
+                        head_width=0.0225,
+                        color='black')
+
+        fig.lines.extend([l1])
+
+        axs['pitch'].text(x=60, y=84,
+                          s='Dirección de Ataque',
+                          ha='center',
+                          size='10.5',
+)
 
         # Figure background color
         fig.patch.set_facecolor(fig_bg_color)
@@ -542,14 +619,17 @@ with tab_one:
             x=-margin1,
             y=60,
             s='o',
-            # c=fig_bg_color,
-            c='red',
+            c=fig_bg_color,
+            # c='red',
+            ha='center',
         )
         axs['pitch'].text(
-            x=80+margin1,
+            x=120+margin1,
             y=60,
             s='o',
             c=fig_bg_color,
+            # c='red',
+            ha='center',
         )
 
         # Add title
@@ -688,13 +768,13 @@ with tab_one:
         )
 
         # ------------ Add Credits
-        axs['title'].text(
+        axs['endnote'].text(
             1,
-            .95,
+            -.2,
             '@DGCFutbol',
             va='top',
             ha='right',
-            fontsize=13,
+            fontsize=11,
             weight='bold',
             # ontproperties=robotto_regular.prop,
             color=event1_marker_color1,
@@ -707,7 +787,9 @@ with tab_one:
 # -------------------------- SETUP MULTIGRID FIGURE
 with tab_two:
     if len(players) != 3:
-        st.caption('This viz requires only 3 players selected.')
+        # st.caption('This viz requires only 3 players selected.')
+        st.caption('Selecciona solo 3 jugadores.')
+
     else:
         pitch2 = VerticalPitch(
             # axis=True,
@@ -725,7 +807,7 @@ with tab_two:
             # extend the top axis 10 data units
             pad_top=pitch_top_ad,
             # extend the bottom axis 20 data units
-            pad_bottom=-8,
+            pad_bottom=0,
         )
 
         fig2, axs2 = pitch2.grid(
@@ -842,7 +924,7 @@ with tab_two:
             xstart, ystart = standard.transform(pdf['x'], pdf['y'])
             xend, yend = standard.transform(pdf['end_x'], pdf['end_y'])
 
-            pitch.lines(
+            pitch2.lines(
                 xstart=xstart,
                 ystart=ystart,
                 xend=xend,
@@ -860,7 +942,7 @@ with tab_two:
                 alpha_end=line_alpha_end2,
             )
 
-            pitch.scatter(
+            pitch2.scatter(
                 x=xend,
                 y=yend,
                 ax=axs2['pitch'][i],
@@ -876,7 +958,7 @@ with tab_two:
             xstart, ystart = standard.transform(pdf['x'], pdf['y'])
             xend, yend = standard.transform(pdf['end_x'], pdf['end_y'])
 
-            pitch.lines(
+            pitch2.lines(
                 xstart=xstart,
                 ystart=ystart,
                 xend=xend,
@@ -891,7 +973,7 @@ with tab_two:
                 alpha_end=line_alpha_end2,
             )
 
-            pitch.scatter(
+            pitch2.scatter(
                 x=xend,
                 y=yend,
                 ax=axs2['pitch'][i],
@@ -921,7 +1003,7 @@ with tab_two:
             #     fontsize='large',
             # )
 
-            legend_y = 32
+            legend_y = -5
             legend_completedt2 = axs2['pitch'][i].text(
                 x=40,
                 y=legend_y,
@@ -974,184 +1056,184 @@ with tab_two:
         st.pyplot(fig2,
                   # use_container_width=False
                   )
-
-with tab_four:
-
-    st.caption('Note: This viz only uses the \'Team\' filter.')
-
-    fig, axs = plt.subplots(nrows=4, ncols=5, figsize=(20, 18), dpi=200)
-    axs = np.array(axs)
-
-    for index, ax in enumerate(axs.reshape(-1)):
-        pitch = plot_attacking(ax)
-
-    plt.subplots_adjust(
-        left=0.05,
-        right=0.95,
-        bottom=0,
-        wspace=.1,
-        hspace=-0.5,
-    )
-
-    # Title axes stretches fig to full width
-    # dimensions(left, bottom, width, height) of new axes.
-    # In fractions of fig w and h
-    title_ax = fig.add_axes(
-        [0, 0.8, 1, 0.1]
-    )
-
-    title_ax.axis('off')
-
-    # Bottom-margin
-    fig.text(
-        x=0.5, y=0.09,
-        s='o',
-        c=fig_bg_color,
-    )
-
-    title = title_ax.text(
-        x=0.5, y=0.8,
-        s="WHICH TEAMS ARE GETTING BETTER AT PROGRESSING THE BALL?",
-        va="top", ha="center",
-        fontsize=25,
-        color="black",
-        # font="DM Sans",
-        weight="bold"
-    )
-
-    # --------------------------- Filter Data
-    # --- General filter for all 5 columns
-
-    # Filter by team
-    pdf = df[df['team'] == team]
-
-    # Filter by Opposition
-    pdf = pdf[
-        ((pdf['home'] == team) & (pdf['away'].isin(rivals)))
-        |
-        ((pdf['home'].isin(rivals)) & (pdf['away'] == team))
-        ]
-
-    # Passes only
-    pdf = pdf[pdf['type'] == 'Pass']
-
-    # --- First Column - Passes into Final 3rd
-    pdf1 = pdf[
-        (pdf['end_x'] >= (2/3 * 100))
-        & (pdf['end_x'] <= (3/3 * 100))
-        ]
-
-    # --- Second Column - Carries into Final 3rd
-    # --- Third Column - Passes into Pen Box
-
-    # Filter by penalty box coordinates
-    sb_to_op = Standardizer(pitch_from='statsbomb', pitch_to='opta')
-    endx, endy = sb_to_op.transform([102, 102], [18, 62])
-    pdf3 = pdf[
-        (
-                (pdf['end_x'] >= endx[0])
-                & (pdf['end_y'] >= endy[1])
-                & (pdf['end_y'] <= endy[0])
-        )
-        ]
-
-
-    # --- Fourth Column - Carries into Pen Box
-
-    # --- Fifth Column - Passes in Pen Box
-
-    # --------------------------- Plot Events
-
-    # --- Third Column - Passes into Pen Box
-    lw = 1
-    mw1 = 1
-
-    # Get top 5 players with most  successful passes
-    pdf_f = pdf3[pdf3['outcome_type'] == 'Successful']
-    top = pdf_f[['player', 'type']].groupby(['player']).agg('count')
-    print(top)
-    top = top.sort_values(by=['type'], ascending=False).head().index.to_list()
-
-    for i, player in enumerate(top):
-
-        # Filter by player
-        pdf = pdf3[pdf3['player'] == player]
-        # Unsuccessful Passes
-        pdfu = pdf[pdf['outcome_type'] == 'Unsuccessful']
-        xstart, ystart = standard.transform(pdfu['x'], pdfu['y'])
-        xend, yend = standard.transform(pdfu['end_x'], pdfu['end_y'])
-
-        axs[2][i].text(
-            x=60, y=-5,
-            s=f'{player}',
-            ha='center',
-            va='bottom'
-        )
-
-        pitch.lines(
-            xstart=xstart,
-            ystart=ystart,
-            xend=xend,
-            yend=yend,
-            comet=is_line_transparent,
-            # color='#c1c1bf', # BenGriffis gray
-            color=event2_marker_color1,
-            ax=axs[2][i],
-            lw=lw,
-            label=f'55'
-                  f' missed',
-
-            transparent=is_line_transparent,
-            alpha_start=line_alpha_start2,
-            alpha_end=line_alpha_end2,
-        )
-
-        pitch.scatter(
-            x=xend,
-            y=yend,
-            ax=axs[2][i],
-            s=mw1,
-            # linewidth=0,
-            marker='o',
-            facecolor=event2_marker_color1,
-        )
-
-        # Successful Passes
-        pdfs = pdf[pdf['outcome_type'] == 'Successful']
-        xstart, ystart = standard.transform(pdfs['x'], pdfs['y'])
-        xend, yend = standard.transform(pdfs['end_x'], pdfs['end_y'])
-
-        pitch.lines(
-            xstart=xstart,
-            ystart=ystart,
-            xend=xend,
-            yend=yend,
-            comet=True,
-            color=event1_marker_color1,
-            ax=axs[2][i],
-            lw=lw,
-            label=f'50',
-            transparent=is_line_transparent,
-            alpha_start=line_alpha_start2,
-            alpha_end=line_alpha_end2,
-        )
-
-        pitch.scatter(
-            x=xend,
-            y=yend,
-            ax=axs[2][i],
-            s=mw1,
-            marker='o',
-            facecolor=event1_marker_color2,
-            # facecolor='#ef4146',
-            zorder=2,
-        )
+#
+# with tab_four:
+#
+#     st.caption('Note: This viz only uses the \'Team\' filter.')
+#
+#     fig, axs = plt.subplots(nrows=4, ncols=5, figsize=(20, 18), dpi=200)
+#     axs = np.array(axs)
+#
+#     for index, ax in enumerate(axs.reshape(-1)):
+#         pitch = plot_attacking(ax)
+#
+#     plt.subplots_adjust(
+#         left=0.05,
+#         right=0.95,
+#         bottom=0,
+#         wspace=.1,
+#         hspace=-0.5,
+#     )
+#
+#     # Title axes stretches fig to full width
+#     # dimensions(left, bottom, width, height) of new axes.
+#     # In fractions of fig w and h
+#     title_ax = fig.add_axes(
+#         [0, 0.8, 1, 0.1]
+#     )
+#
+#     title_ax.axis('off')
+#
+#     # Bottom-margin
+#     fig.text(
+#         x=0.5, y=0.09,
+#         s='o',
+#         c=fig_bg_color,
+#     )
+#
+#     title = title_ax.text(
+#         x=0.5, y=0.8,
+#         s="WHICH TEAMS ARE GETTING BETTER AT PROGRESSING THE BALL?",
+#         va="top", ha="center",
+#         fontsize=25,
+#         color="black",
+#         # font="DM Sans",
+#         weight="bold"
+#     )
+#
+#     # --------------------------- Filter Data
+#     # --- General filter for all 5 columns
+#
+#     # Filter by team
+#     pdf = df[df['team'] == team]
+#
+#     # Filter by Opposition
+#     pdf = pdf[
+#         ((pdf['home'] == team) & (pdf['away'].isin(rivals)))
+#         |
+#         ((pdf['home'].isin(rivals)) & (pdf['away'] == team))
+#         ]
+#
+#     # Passes only
+#     pdf = pdf[pdf['type'] == 'Pass']
+#
+#     # --- First Column - Passes into Final 3rd
+#     pdf1 = pdf[
+#         (pdf['end_x'] >= (2/3 * 100))
+#         & (pdf['end_x'] <= (3/3 * 100))
+#         ]
+#
+#     # --- Second Column - Carries into Final 3rd
+#     # --- Third Column - Passes into Pen Box
+#
+#     # Filter by penalty box coordinates
+#     sb_to_op = Standardizer(pitch_from='statsbomb', pitch_to='opta')
+#     endx, endy = sb_to_op.transform([102, 102], [18, 62])
+#     pdf3 = pdf[
+#         (
+#                 (pdf['end_x'] >= endx[0])
+#                 & (pdf['end_y'] >= endy[1])
+#                 & (pdf['end_y'] <= endy[0])
+#         )
+#         ]
+#
+#
+#     # --- Fourth Column - Carries into Pen Box
+#
+#     # --- Fifth Column - Passes in Pen Box
+#
+#     # --------------------------- Plot Events
+#
+#     # --- Third Column - Passes into Pen Box
+#     lw = 1
+#     mw1 = 1
+#
+#     # Get top 5 players with most  successful passes
+#     pdf_f = pdf3[pdf3['outcome_type'] == 'Successful']
+#     top = pdf_f[['player', 'type']].groupby(['player']).agg('count')
+#     print(top)
+#     top = top.sort_values(by=['type'], ascending=False).head().index.to_list()
+#
+#     for i, player in enumerate(top):
+#
+#         # Filter by player
+#         pdf = pdf3[pdf3['player'] == player]
+#         # Unsuccessful Passes
+#         pdfu = pdf[pdf['outcome_type'] == 'Unsuccessful']
+#         xstart, ystart = standard.transform(pdfu['x'], pdfu['y'])
+#         xend, yend = standard.transform(pdfu['end_x'], pdfu['end_y'])
+#
+#         axs[2][i].text(
+#             x=60, y=-5,
+#             s=f'{player}',
+#             ha='center',
+#             va='bottom'
+#         )
+#
+#         pitch.lines(
+#             xstart=xstart,
+#             ystart=ystart,
+#             xend=xend,
+#             yend=yend,
+#             comet=is_line_transparent,
+#             # color='#c1c1bf', # BenGriffis gray
+#             color=event2_marker_color1,
+#             ax=axs[2][i],
+#             lw=lw,
+#             label=f'55'
+#                   f' missed',
+#
+#             transparent=is_line_transparent,
+#             alpha_start=line_alpha_start2,
+#             alpha_end=line_alpha_end2,
+#         )
+#
+#         pitch.scatter(
+#             x=xend,
+#             y=yend,
+#             ax=axs[2][i],
+#             s=mw1,
+#             # linewidth=0,
+#             marker='o',
+#             facecolor=event2_marker_color1,
+#         )
+#
+#         # Successful Passes
+#         pdfs = pdf[pdf['outcome_type'] == 'Successful']
+#         xstart, ystart = standard.transform(pdfs['x'], pdfs['y'])
+#         xend, yend = standard.transform(pdfs['end_x'], pdfs['end_y'])
+#
+#         pitch.lines(
+#             xstart=xstart,
+#             ystart=ystart,
+#             xend=xend,
+#             yend=yend,
+#             comet=True,
+#             color=event1_marker_color1,
+#             ax=axs[2][i],
+#             lw=lw,
+#             label=f'50',
+#             transparent=is_line_transparent,
+#             alpha_start=line_alpha_start2,
+#             alpha_end=line_alpha_end2,
+#         )
+#
+#         pitch.scatter(
+#             x=xend,
+#             y=yend,
+#             ax=axs[2][i],
+#             s=mw1,
+#             marker='o',
+#             facecolor=event1_marker_color2,
+#             # facecolor='#ef4146',
+#             zorder=2,
+#         )
 
     plt.savefig('filename.png',
                 bbox_inches='tight',
                 dpi=500
                 )
-
-    st.pyplot(fig,
-              # use_container_width=False
-              )
+    #
+    # st.pyplot(fig2,
+    #           # use_container_width=False
+    #           )
