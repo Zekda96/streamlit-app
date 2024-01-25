@@ -3,7 +3,7 @@
 
 [[Web App]]()
 
-Esta Web App presenta maneras interactivas de visualizar y explorar datos de jugadores y equipos, las cuales ejemplifican su aplicación profesional en Scouting, Análisis de Rendimiento, Análisis Táctico, etc.
+Esta Web App presenta maneras interactivas de visualizar y explorar datos de jugadores y equipos, las cuales ejemplifican su aplicación profesional en Scouting, Análisis de Rendimiento, Análisis Táctico, etc. Se puede acceder a ella mediente este [enlace](dgcfutbol.streamlit.app).
 
 ## Creación de Mapas de Pases (Chalkboard)
 ### Exploración Visual de Rendimiento y Patrones Tácticos
