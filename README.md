@@ -3,4 +3,4 @@
 
 [[Web App]](dgcfutbol.streamlit.app)
 
-Esta web app contiene herramientas de visualizacion y exploracion de datos con aplicaciones en Scouting, Analisis de Rendimiento, Analisis Tactico, etc. 
+Esta Web App presenta maneras interactivas de visualizar y explorar datos de jugadores y equipos, las cuales ejemplifican su aplicacion profesional en Scouting, Análisis de Rendimiento, Análisis Táctico, etc.
