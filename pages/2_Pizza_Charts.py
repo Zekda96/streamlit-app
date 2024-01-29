@@ -115,6 +115,30 @@ s = '1. Elegir equipo\n' \
     'las métricas.*'
 st.write(s)
 
+
+col1, col2 = st.columns(2)
+
+with col1:
+    # Filter by team
+    teams = pizza_rank.team.unique()
+    team = st.selectbox(
+        label='Elegir Equipo',
+        options=pizza_rank.team.unique(),
+        index=int(np.where(teams == 'Manchester City')[0][0]),
+    )
+
+
+with col2:
+    # Filter by player
+    players_from_team = pizza_rank[pizza_rank['team'] == team].player
+    player = st.selectbox(
+        label='Elegir Jugador',
+        options=players_from_team,
+        index=10,
+        # index=18,
+    )
+    # Player is filtered after calculating ranks
+
 # Tabs for stats select
 tab_def, tab_poss, tab_pmk, tab_atk = st.tabs(["Defensa",
                                                "Posesión",
@@ -182,29 +206,6 @@ with tab_atk:
                 'ProgPassesRec'
             ]
         )
-
-col1, col2 = st.columns(2)
-
-with col1:
-    # Filter by team
-    teams = pizza_rank.team.unique()
-    team = st.selectbox(
-        label='Elegir Equipo',
-        options=pizza_rank.team.unique(),
-        index=int(np.where(teams == 'Manchester City')[0][0]),
-    )
-
-
-with col2:
-    # Filter by player
-    players_from_team = pizza_rank[pizza_rank['team'] == team].player
-    player = st.selectbox(
-        label='Elegir Jugador',
-        options=players_from_team,
-        index=10,
-        # index=18,
-    )
-    # Player is filtered after calculating ranks
 
 # Vals for pizza chart
 rank_vals_def, ranks_debug_def = rank_data(stats_def,

@@ -249,6 +249,11 @@ st.write('## Ejemplos')
 st.write(
          'Para empezar podemos seleccionar una de las 3 opciones en la '
          'pestaña "Ejemplos" ubicada a la izquierda.\n\n')
+
+st.write('1. **Eficiencia Goleadora**\n'
+         '2. **Eficiencia para Asistir**\n'
+         '3. **Acciones Progresivas**')
+
 st.write('**1. Eficiencia Goleadora** muestras 2 variables complementarias: '
          '*Y-Diferencia entre Goles y Goles esperados* y *X-Goles '
          'esperados sin penales*. Mientras mas a la derecha se encuentre '
