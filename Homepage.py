@@ -4,9 +4,8 @@ import numpy as np
 
 # ---------------------------------------------------------------- Page config
 st.set_page_config(
-    page_title='Data Analysis',
+    page_title='Análisis de Datos',
     page_icon=':soccer:'
-
 )
 
 

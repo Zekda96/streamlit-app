@@ -107,7 +107,7 @@ st.set_page_config(
 )
 
 # ------------------------------------------------------------------ LOAD DATA
-df = read_csv('data/2324_events.csv')
+df = read_csv('data/2324_events_test.csv')
 
 df = df.iloc[:, 1:]
 
@@ -152,7 +152,7 @@ rivals_opt += df.loc[df['away'] == team, 'home'].unique().tolist()
 rivals_opt.sort()
 rivals = st.sidebar.multiselect(
     label='Select rivals',
-    options=rivals_opt[:3],
+    options=rivals_opt[:4],
     default=rivals_opt[0],
 )
 
@@ -277,8 +277,11 @@ for player in players:
     player_df[player][team_df['outcome_type'] == 'Successful'].count()[
         'player']
 
-    player_cmp[player] = round(
-        scc_player[player] / player_events[player] * 100, 1)
+    if player_events[player] > 0:
+        player_cmp[player] = round(
+            scc_player[player] / player_events[player] * 100, 1)
+    else:
+        player_cmp[player] = 0.00
 
     # Unsuccessful
 
@@ -914,7 +917,6 @@ with tab_two:
                  'West Ham': 'wh'}
 
         # Add team logo
-        print(team)
         if team in logos.keys():
             image_path = f'images/{logos[team]}.png'
             image = Image.open(image_path)
