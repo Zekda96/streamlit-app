@@ -107,7 +107,7 @@ st.set_page_config(
 )
 
 # ------------------------------------------------------------------ LOAD DATA
-df = read_csv('data/2324_events_test.csv')
+df = read_csv('data/2324_events.csv')
 
 df = df.iloc[:, 1:]
 
