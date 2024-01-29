@@ -100,6 +100,12 @@ def plot_attacking(ax):
 # Standardizer
 standard = Standardizer(pitch_from='opta', pitch_to='statsbomb')
 
+# ---------------------------------------------------------------- Page config
+st.set_page_config(
+    page_title='Análisis de Datos',
+    page_icon=':soccer:'
+)
+
 # ------------------------------------------------------------------ LOAD DATA
 if 'database' not in st.session_state:
     st.session_state['database'] = read_csv('data/2324_events.csv')
@@ -107,12 +113,6 @@ if 'database' not in st.session_state:
 df = st.session_state['database']
 
 df = df.iloc[:, 1:]
-
-# ---------------------------------------------------------------- Page config
-st.set_page_config(
-    page_title='Análisis de Datos',
-    page_icon=':soccer:'
-)
 
 # ------------------------------- DASHBOARD  ----------------------------------
 # ---------------------------- SIDEBAR FILTERS --------------------------------
@@ -123,6 +123,22 @@ team = st.sidebar.selectbox(
     options=df.team.sort_values().unique(),
     index=int(np.where(df.team.sort_values().unique() == 'Chelsea')[0][0]),
 )
+
+# Events
+team_colors = {'Chelsea': '#0b4393',
+               'Manchester United': '#de0011',
+               'Liverpool': '#f30022',
+               'Arsenal': '#db0007',
+               'Tottenham': '#0f1f4a',
+               'Aston Villa': '#650334',
+               'Newcastle United': '#231f20',
+               'Manchester City': '#1683E2',
+               }
+
+if team in team_colors.keys():
+    event1_marker_color1 = team_colors[team]
+else:
+    event1_marker_color1 = team_colors['Chelsea']
 
 # Selectbox to choose players of interest
 players = st.sidebar.multiselect(
@@ -140,7 +156,7 @@ rivals_opt.sort()
 rivals = st.sidebar.multiselect(
     label='Select rivals',
     options=rivals_opt,
-    default=['Burnley']
+    default=rivals_opt[4],
 )
 
 # Filter by type of event
@@ -276,6 +292,7 @@ for player in players:
 # ------------------ SORT TOP 5 PLAYERS
 top = team_df[['player', 'type']].groupby(['player']).agg('count')
 top = top.sort_values(by=['type'], ascending=False).head()
+
 
 # ------------------------------- MAIN PAGE  ----------------------------------
 
@@ -428,14 +445,7 @@ pitch_line_width = 0.8
 pitch_line_color = '#03191E'
 pitch_bg_color = '#faf9f4'
 
-# Events
-event1_marker_color1 = '#0b4393'  # chelsea
-# event1_marker_color1 = '#de0011'  # MUTD
-# event1_marker_color1 = "#f30022"  # Liverpool
-# event1_marker_color1 = "#db0007"  # Arsenal
-# event1_marker_color1 = '#0f1f4a'  # Tottenham
-# event1_marker_color1 = '#650334'  #Aston Villa
-# event1_marker_color1 = '#231f20'
+
 event2_marker_color1 = '#B5B4B2'
 event_line_width1 = 1.8
 
@@ -896,11 +906,24 @@ with tab_two:
             alpha=0.6,
         )
 
+        logos = {'Manchester United': 'mu',
+                 'Arsenal': 'ar',
+                 'Aston Villa': 'av',
+                 'Chelsea': 'ch',
+                 'Liverpool': 'li',
+                 'Manchester City': 'mc',
+                 'Newcastle United': 'nu',
+                 'Tottenham': 'th',
+                 'West Ham': 'wh'}
+
         # Add team logo
-        image = Image.open(image_path)
-        newax = fig2.add_axes([0, 0.855, 0.111, 0.111], anchor='W', zorder=1)
-        newax.imshow(image)
-        newax.axis('off')
+        print(team)
+        if team in logos.keys():
+            image_path = f'images/{logos[team]}.png'
+            image = Image.open(image_path)
+            newax = fig2.add_axes([0, 0.855, 0.111, 0.111], anchor='W', zorder=1)
+            newax.imshow(image)
+            newax.axis('off')
 
         for i, ax in enumerate(axs2['pitch'].flat[:len(players)]):
             # Player names
