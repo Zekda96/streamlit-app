@@ -152,8 +152,8 @@ rivals_opt += df.loc[df['away'] == team, 'home'].unique().tolist()
 rivals_opt.sort()
 rivals = st.sidebar.multiselect(
     label='Select rivals',
-    options=rivals_opt,
-    default=rivals_opt[4],
+    options=rivals_opt[:3],
+    default=rivals_opt[0],
 )
 
 # Filter by type of event
