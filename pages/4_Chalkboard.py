@@ -150,11 +150,13 @@ players = st.sidebar.multiselect(
 rivals_opt = df.loc[df['home'] == team, 'away'].unique().tolist()
 rivals_opt += df.loc[df['away'] == team, 'home'].unique().tolist()
 rivals_opt.sort()
-rivals = st.sidebar.multiselect(
+rivals = st.sidebar.selectbox(
     label='Select rivals',
-    options=rivals_opt[:4],
-    default=rivals_opt[0],
+    options=rivals_opt,
+    # default=rivals_opt[0],
 )
+
+rivals = [rivals]
 
 # Filter by type of event
 event = st.sidebar.selectbox(
@@ -208,7 +210,7 @@ if len(players) > 0:
 title_text2 = st.sidebar.text_input(
     # label='2nd Figure Title',
     label='Titulo de Figura 2',
-    value=f'{team} Passes Into Final Third'
+    value=f'{team} Passes'
 )
 # ------------------------------ FILTER DATA ----------------------------------
 # Filter by team
@@ -426,7 +428,7 @@ subtitle1_ha = 'center'
 subtitle1_va = 'center'
 subtitle1_size = 12
 
-subtitle1_text = f"23/24 Season | Premier League | As of Matchweek 12"
+subtitle1_text = f"23/24 Season | Premier League | vs. {rivals[0]}"
 
 subtitle1_color = "#030303"
 
@@ -484,8 +486,8 @@ title_ha2 = 'left'
 title_va2 = 'top'
 
 # Subtitle
-subtitle1_text2 = f'23/24 Premier League | As of Matchweek 12 | ' \
-                  f'Top 3 Players with Most Attempted Passes Into Final 3rd'
+subtitle1_text2 = f'23/24 Premier League | vs. {rivals[0]} | ' \
+                  f'Top 3 Players with Most Attempted Passes'
 subtitle_size2 = 16
 
 subtitle1_x2 = 0.091
