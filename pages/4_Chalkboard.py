@@ -18,7 +18,12 @@ from urllib.request import urlopen
 # """
 
 
-# ------------------------------- FUNCTIONS  ----------------------------------
+# --------------------------------- FUNCTIONS ---------------------------------
+@st.cache_data()
+def read_csv(link):
+    return pd.read_csv(link)
+
+
 def replace_thirds(val):
     if val == 'Start':
         val = 0
@@ -96,7 +101,11 @@ def plot_attacking(ax):
 standard = Standardizer(pitch_from='opta', pitch_to='statsbomb')
 
 # ------------------------------------------------------------------ LOAD DATA
-df = pd.read_csv('data/2324_events.csv')
+if 'database' not in st.session_state:
+    st.session_state['database'] = read_csv('data/2324_events.csv')
+
+df = st.session_state['database']
+
 df = df.iloc[:, 1:]
 
 # ---------------------------------------------------------------- Page config
