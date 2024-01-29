@@ -768,9 +768,9 @@ with tab_one:
         )
 
         # ------------ Add Credits
-        axs['endnote'].text(
-            1,
-            -.2,
+        fig.text(
+            0.597,
+            0.17,
             '@DGCFutbol',
             va='top',
             ha='right',
@@ -779,6 +779,19 @@ with tab_one:
             # ontproperties=robotto_regular.prop,
             color=event1_marker_color1,
             alpha=0.3,
+        )
+
+        axs['endnote'].text(
+            1,
+            0.1,
+            'Gráficos: Daniel Granja C.\n@DGCFutbol',
+            va='top',
+            ha='right',
+            fontsize=9,
+            weight='bold',
+            # ontproperties=robotto_regular.prop,
+            color=event1_marker_color1,
+            alpha=0.4,
         )
 
         # DRAW FIG

@@ -4,6 +4,13 @@ import pandas as pd
 from mplsoccer import PyPizza, add_image, FontManager
 import matplotlib.pyplot as plt
 
+
+# ------------------------ Page config ----------------------------------------
+st.set_page_config(
+    page_title='Análisis de Datos',
+    page_icon=':soccer:'
+)
+
 # Load fonts
 font_normal = FontManager('https://raw.githubusercontent.com/google/fonts/main/ofl/roboto/'
                           'Roboto%5Bwdth,wght%5D.ttf')
@@ -19,6 +26,11 @@ blue = '#1a78cf'
 
 
 # --------------------------------- FUNCTIONS ---------------------------------
+@st.cache_data()
+def read_csv(link):
+    return pd.read_csv(link)
+
+
 def map_stat_labels(labels_list):
     map_labels = {'Tackles\nplus\nInterceptions': 'Tackles +\nInterceptions',
                   'Percent\nof\nChallenge\nSuccess': 'Succ. Challenge %'}
@@ -65,20 +77,23 @@ def rank_data(stat_list, input_df, exclude_vals):
 
 
 # -------------------------------- DATA ---------------------------------------
+if 'database' not in st.session_state:
+    st.session_state['database'] = read_csv('data/22-23_fbref_stats.csv')
 df = st.session_state['database']
-pizza_rank = pd.DataFrame(df)
 
+# CHOOSE VALUE TO RANK
+if 'exclude_values_p90' not in st.session_state:
+    st.session_state['exclude_values_p90'] = ['Percent_of_Challenge_Success',
+                                              'Sh/90',
+                                              'SoT/90'
+                                              ]
 
 exclude_values_p90 = st.session_state['exclude_values_p90']
 
+pizza_rank = pd.DataFrame(df)
+
 rv_df = df.iloc[:, 12:]  # Exclude categorical columns
 ranked_vals = rv_df.select_dtypes(include=np.number).columns.tolist()
-
-# ------------------------ Page config ----------------------------------------
-st.set_page_config(
-    page_title='Análisis de Datos',
-    page_icon=':soccer:'
-)
 
 # ------------------------- RANK PIZZA PLOT ------------------------------
 st.header('Pizza Charts: Análisis de Rendimiento')
@@ -278,13 +293,22 @@ fig_pizza, ax = baker.make_pizza(
 
 # ----------------------------- TEXT ELEMENTS
 # Add credits
-CREDIT_1 = "data: opta via fbref"
-CREDIT_2 = "inspired by: @Worville, @FootballSlices, @somazerofc & @Soumyaj15209314"
+CREDIT_1 = "Data: Opta via fbref"
 
 fig_pizza.text(
-    0.01, 0.02, f"{CREDIT_1}\n{CREDIT_2}", size=9,
+    0.01, 0.02, f"{CREDIT_1}", size=9,
     color="#F2F2F2",
     ha="left"
+)
+
+CREDIT_3 = 'Daniel Granja C.'
+CREDIT_4 = '@DGCFutbol'
+
+fig_pizza.text(
+    0.99, 0.02, f"{CREDIT_3}\n{CREDIT_4}",
+    size=12,
+    color="#F2F2F2",
+    ha="right"
 )
 
 # Add margin
@@ -343,6 +367,8 @@ fig_pizza.patches.extend([
         transform=fig_pizza.transFigure, figure=fig_pizza
     ),
 ])
+
+# Add Credits
 
 # Show plot
 st.pyplot(fig_pizza)

@@ -1,11 +1,21 @@
+import pandas as pd
 import streamlit as st
 import plotly.graph_objects as go
 import plotly.express as px
 import numpy as np
 import statsmodels.api as sm
 
+# ------------------------ Page config ----------------------------------------
+st.set_page_config(
+    page_title='Análisis de Datos',
+    page_icon=':soccer:'
+)
+
 
 # ---------------------------- FUNCTIONS --------------------------------------
+@st.cache_data()
+def read_csv(link):
+    return pd.read_csv(link)
 
 
 def make_p90(dataframe, stat):
@@ -108,13 +118,19 @@ team_colours = {
 }
 
 # -------------------------------- DATA ---------------------------------------
+if 'database' not in st.session_state:
+    st.session_state['database'] = read_csv('data/22-23_fbref_stats.csv')
 df = st.session_state['database']
 
-# ------------------------ Page config ----------------------------------------
-st.set_page_config(
-    page_title='Análisis de Datos',
-    page_icon=':soccer:'
-)
+# CHOOSE VALUE TO RANK
+if 'exclude_values_p90' not in st.session_state:
+    st.session_state['exclude_values_p90'] = ['Percent_of_Challenge_Success',
+                                              'Sh/90',
+                                              'SoT/90'
+                                              ]
+
+exclude_values_p90 = st.session_state['exclude_values_p90']
+
 # ------------------------------- LAYOUT --------------------------------------
 # ------------------------------ Sidebar
 
@@ -228,6 +244,7 @@ st.write('Un scatter plot permite una comparación a base de 2 variables, '
          )
 
 st.divider()
+st.write('## Ejemplos')
 
 st.write(
          'Para empezar podemos seleccionar una de las 3 opciones en la '
@@ -300,7 +317,9 @@ fig.update_layout(
         # b=20,
     ),
     paper_bgcolor="#050505",
+    # paper_bgcolor='#faf9f4',
     plot_bgcolor='#131313',
+
 )
 
 # Update 'other players' markers
@@ -457,9 +476,32 @@ elif graph_trend == 'Zones':
 
 fig.update_layout(
     title_text=graph_title,
-    title_font_size=30,
+    title_font_size=25,
     title_automargin=True,
+
 )
+
+# Add Credits
+x = 1.01
+y = 0
+ydiff = 0.05
+# c = '#0b4393'
+c = '#358CFF'
+fig.add_annotation(x=x, y=y,
+                   xref="paper", yref="paper",
+                   text="Daniel Granja C.",
+                   font_color=c,
+                   font_size=16,
+                   showarrow=False,
+                   yshift=10)
+
+fig.add_annotation(x=x, y=y-ydiff,
+                   xref="paper", yref="paper",
+                   text="@DGCFutbol",
+                   font_color=c,
+                   font_size=15,
+                   showarrow=False,
+                   yshift=10)
 
 
 st.plotly_chart(fig)

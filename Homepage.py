@@ -34,7 +34,7 @@ pizza = pizza.reset_index(drop=True)
 
 # Content
 st.header('Daniel Granja C.')
-st.subheader('Análisis y Visualización de Datos :soccer:')
+st.subheader('Visualización y Análisis de Datos Deportivos :soccer:')
 
 st.write('[[Twitter]](https://twitter.com/DGCFutbol) '
          '[[Instagram]](https://instagram.com/DGCFutbol) '
@@ -43,16 +43,38 @@ st.write('[[Twitter]](https://twitter.com/DGCFutbol) '
 
 st.divider()
 
-s = 'Las siguientes herramientas presentan maneras interactivas de\n' \
-    '**visualizar y explorar datos** de jugadores y equipos, las cuales\n' \
-    'ejemplifican el uso profesional que se les puede dar para\n' \
-    'Scouting, Análisis de Rendimiento, Análisis Táctico, etc.\n\n' \
-    'En la barra lateral se encuentran las siguientes ' \
-    'herramientas:\n\n' \
-    '1. Pizza Charts - Rendimiento de Jugador\n' \
-    '2. Scatter Plots - Perfil de Estilo de Juego de Jugadores\n' \
-    '3. Chalkboard - Creación de Mapa de Pases'
-st.write(s)
+st.write(
+    'Las siguientes herramientas presentan maneras interactivas de\n'
+    '**visualizar y explorar datos** de jugadores y equipos, las cuales\n'
+    'ejemplifican el uso profesional que se les puede dar para\n'
+    'Scouting, Análisis de Rendimiento, Análisis Táctico, etc.\n\n'
+    'En la barra lateral se encuentran las siguientes '
+    'herramientas:\n\n')
+
+# Chalkboard
+t = 'Creación de Mapas de Pases (Chalkboard)'
+subt = 'Exploración Visual de Rendimiento y Patrones Tácticos'
+st.write(f'## {t}')
+st.write(f'##### {subt}')
+
+st.image('images/chelsea_passes.png', caption=f'{t} - {subt}')
+
+# Pizza Charts
+t = 'Pizza Charts'
+subt = 'Calificación Comparativa basada en Rendimiento'
+st.write(f'## {t}')
+st.write(f'##### {subt}')
+
+st.image('images/pizza.png', caption=f'{t} - {subt}')
+
+# Scatter Plot
+t = 'Scatter Plot Interactivo'
+subt = 'Exploración Comparativa de Datos para Identificar Estilos de ' \
+       'Juego y Rendimiento'
+st.write(f'## {t}')
+st.write(f'##### {subt}')
+
+st.image('images/progression.png', caption=f'{t} - {subt}')
 
 st.divider()
 
