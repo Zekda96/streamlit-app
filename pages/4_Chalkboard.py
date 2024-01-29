@@ -107,10 +107,7 @@ st.set_page_config(
 )
 
 # ------------------------------------------------------------------ LOAD DATA
-if 'database' not in st.session_state:
-    st.session_state['database'] = read_csv('data/2324_events.csv')
-
-df = st.session_state['database']
+df = read_csv('data/2324_events.csv')
 
 df = df.iloc[:, 1:]
 
