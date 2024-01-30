@@ -272,6 +272,7 @@ for player in players:
     player_df[player] = team_df[team_df['player'] == player]
     # Count and get % of total
     player_events[player] = player_df[player].count()['player']
+
     if team_events > 1:
         p[player] = round(player_events[player] / team_events * 100, 1)
     else:
@@ -338,12 +339,17 @@ st.write(
 #     f'Fallados: {fail_team}\n'
 # )
 
+if team_events > 0:
+    prec = round(scc_team/team_events * 100, 1)
+else:
+    prec = 0.0
+
 passes_df = [
     {'Player': team,
      'Pases Totales': team_events,
      'Completados': scc_team,
      'Fallados': fail_team,
-     'Precision (%)': round(scc_team/team_events * 100, 1)}
+     'Precision (%)': prec}
 
 ]
 
