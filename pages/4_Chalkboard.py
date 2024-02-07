@@ -1,14 +1,17 @@
+# App
 import streamlit as st
+from streamlit.connections import BaseConnection
+from st_supabase_connection import SupabaseConnection
+
+# Manage data
 import pandas as pd
 import numpy as np
-import matplotlib.image as mpimg
+
+# Viz
+import matplotlib.pyplot as plt
 from mplsoccer import Pitch, VerticalPitch, Standardizer
 from matplotlib.patches import FancyArrow
-
-import io
-import matplotlib.pyplot as plt
 from PIL import Image
-from urllib.request import urlopen
 
 # """
 # mplsoccer uses Statsbomb pitch
@@ -35,36 +38,6 @@ def replace_thirds(val):
         val = 100
 
     return val
-
-
-# def convert_x(vals):
-#     """ mplsoccer Pitch has dimensions x=120 and y=80 (Statsbomb)
-#     Current used scrapped data from WhoScored shows coordinates as
-#     percentages of the total length of the pitch, so x=100 and y=100.
-#     This converts WhoScored coordinates so they match mplsoccer's Pitch """
-#
-#     if type(vals) is list:
-#         return_list = []
-#         for v in vals:
-#             return_list.append((v / 100) * 120)
-#         return return_list
-#     else:
-#         return (vals / 100) * 120
-#
-#
-# def convert_y(vals):
-#     """ mplsoccer Pitch has dimensions x=120 and y=80 (Statsbomb)
-#     Current used scrapped data from WhoScored shows coordinates as
-#     percentages of the total length of the pitch, so x=100 and y=100.
-#     This converts WhoScored coordinates so they match mplsoccer's Pitch """
-#
-#     if type(vals) is list:
-#         return_list = []
-#         for v in vals:
-#             return_list.append((100 - v) / 100 * 80)
-#         return return_list
-#     else:
-#         return (100 - vals) / 100 * 80
 
 
 def plot_attacking(ax):
@@ -106,10 +79,16 @@ st.set_page_config(
     page_icon=':soccer:'
 )
 
+
 # ------------------------------------------------------------------ LOAD DATA
 df = read_csv('data/2324_events.csv')
-
 df = df.iloc[:, 1:]
+
+# Initialize connection.
+conn = st.connection("supabase", type=SupabaseConnection)
+
+# q1 = ''
+# df = db_query(q1)
 
 # ------------------------------- DASHBOARD  ----------------------------------
 # ---------------------------- SIDEBAR FILTERS --------------------------------
@@ -1292,3 +1271,13 @@ with tab_two:
     # st.pyplot(fig2,
     #           # use_container_width=False
     #           )
+
+st.divider()
+
+
+sb_query = conn.query('*',
+                      table='epl2324_events',
+                      ttl="10m",
+                      ).execute()
+# sb_query = sb_query.filter()
+st.write(sb_query)
