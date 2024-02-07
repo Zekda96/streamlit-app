@@ -1,7 +1,7 @@
 # Daniel Granja C.
 ### Web App - Analisis y Visualizacion de Datos ⚽
 
-[[Web App]]()
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](dgcfutbol.streamlit.app)
 
 Esta Web App presenta maneras interactivas de visualizar y explorar datos de jugadores y equipos, las cuales ejemplifican su aplicación profesional en Scouting, Análisis de Rendimiento, Análisis Táctico, etc. Se puede acceder a ella mediente este [enlace](dgcfutbol.streamlit.app).
 
