@@ -113,7 +113,7 @@ client = bigquery.Client(credentials=credentials)
 # ---------------------------- SIDEBAR FILTERS --------------------------------
 # Filter by league
 league = st.sidebar.selectbox(
-    label='Choose League',
+    label='Select League',
         # options=['Pass'],
     options=['🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League'],
     # options=df.type.unique(),
@@ -124,7 +124,7 @@ league_short = league_names[league]
 
 # Filter by season
 season = st.sidebar.selectbox(
-    label='Choose Season',
+    label='Select Season',
         # options=['Pass'],
     options=['23/24'],
     # options=df.type.unique(),
@@ -137,7 +137,7 @@ table = f"{db}.{league_short}{season_short}"
 
 # Filter by type of event
 event = st.sidebar.selectbox(
-    label='Choose event',
+    label='Select event',
     options=['Pass'],
     # options=['Pass', 'Goal'],
     # options=df.type.unique(),
@@ -158,6 +158,14 @@ team = st.sidebar.selectbox(
     label='Select team',
     options=all_teams,
     index=7,
+)
+
+matches_played = len(run_query(
+    '''
+    SELECT DISTINCT home, away FROM `whoscored_events.EPL2324`
+    WHERE team = 'Manchester United'
+    '''
+)
 )
 
 has_db = False
@@ -189,7 +197,7 @@ if st.sidebar.button(label='Cargar Base de Datos'):
 
 st.title('Chalkboard :soccer:')
 st.subheader('Creacion de mapas de pases')
-st.write(f'{league} {season} - 12 Fechas')
+st.write(f'{league} {season} - {matches_played} Partidos')
 
 # -------------------------------------------------------------- Read Database
 
