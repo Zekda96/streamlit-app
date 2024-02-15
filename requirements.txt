@@ -7,4 +7,4 @@ numpy~=1.26.0
 plotly~=5.17.0
 matplotlib~=3.6.3
 statsmodels~=0.14.0
-st-supabase-connection~=1.2.1
+google-cloud-bigquery~=3.17.2
