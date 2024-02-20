@@ -1,6 +1,8 @@
 # App
 import streamlit as st
 from streamlit.connections import BaseConnection
+from streamlit_extras.stateful_button import button as st_button
+import datetime
 
 # Manage data
 import pandas as pd
@@ -27,10 +29,9 @@ from google.cloud import bigquery
 
 
 # --------------------------------- FUNCTIONS ---------------------------------
-@st.cache_data()
+# @st.cache_data()
 # def read_csv(link):
 #     return pd.read_csv(link)
-
 
 # Perform query.
 # Uses st.cache_data to only rerun when the query changes or after 10 min.
@@ -39,18 +40,24 @@ def run_query(query):
     # df = pd.read_gbq(query, credentials=credentials)
     query_job = client.query(query)
     rows_raw = query_job.result()
-    # # Convert to list of dicts. Required for st.cache_data to hash the return value.
+    # Convert to list of dicts
+    # Required for st.cache_data to hash the return value.
     rows = [dict(row) for row in rows_raw]
     return rows
+
+
+def print_func(name: str):
+    now = datetime.datetime.now()
+    print(f'[{now}] {name} changed')
 
 
 def replace_thirds(val):
     if val == 'Start':
         val = 0
     elif val == '1/3':
-        val = 1/3 * 100
+        val = 1 / 3 * 100
     elif val == '2/3':
-        val = 2/3 * 100
+        val = 2 / 3 * 100
     elif val == 'End':
         val = 100
 
@@ -58,7 +65,6 @@ def replace_thirds(val):
 
 
 def plot_attacking(ax):
-
     pitch = Pitch(
         # axis=True,
         # label=True,
@@ -102,6 +108,9 @@ credentials = service_account.Credentials.from_service_account_info(
 )
 client = bigquery.Client(credentials=credentials)
 
+if "db_loaded" not in st.session_state:
+    st.session_state.db_loaded = False
+    st.session_state.db = ''
 
 # ------------------------------------------------------------------ LOAD DATA
 # df = read_csv('data/2324_events.csv')
@@ -112,20 +121,25 @@ client = bigquery.Client(credentials=credentials)
 # ------------------------------- DASHBOARD  ----------------------------------
 # ---------------------------- SIDEBAR FILTERS --------------------------------
 # Filter by league
+
 league = st.sidebar.selectbox(
     label='Select League',
-        # options=['Pass'],
-    options=['🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League'],
+    # options=['Pass'],
+    options=['English Premier League',
+             'Italian Serie A'
+             ],
     # options=df.type.unique(),
+    # on_change=league_func()
 )
 
-league_names = {'🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League': 'EPL'}
+league_names = {'English Premier League': 'EPL',
+                'Italian Serie A': 'ITA'}
 league_short = league_names[league]
 
 # Filter by season
 season = st.sidebar.selectbox(
     label='Select Season',
-        # options=['Pass'],
+    # options=['Pass'],
     options=['23/24'],
     # options=df.type.unique(),
 )
@@ -144,44 +158,49 @@ event = st.sidebar.selectbox(
 )
 
 all_teams = run_query(
-        f'''
+    f'''
         SELECT DISTINCT team from `{table}`
         ORDER BY team ASC
         '''
-    )
+)
 
 all_teams = [row['team'] for row in all_teams]
 
+# if 'team' not in st.session_state:
+#     st.session_state.team = ''
 
 # Selectbox to highlight team
-team = st.sidebar.selectbox(
+st.sidebar.selectbox(
     label='Select team',
     options=all_teams,
     index=7,
+    key='team',
+    on_change=print_func('team_selectbox')
 )
+
+team = st.session_state.team
 
 matches_played = len(run_query(
-    '''
-    SELECT DISTINCT home, away FROM `whoscored_events.EPL2324`
-    WHERE team = 'Manchester United'
+    f'''
+    SELECT DISTINCT home, away FROM `whoscored_events.{league_short}{season_short}`
+    WHERE team = '{team}'
     '''
 )
 )
 
-has_db = False
 # Return only selected type of events from selected team
 # Run query when button is pressed
-if st.sidebar.button(label='Cargar Base de Datos'):
-    has_db = True
-    df = pd.DataFrame(
+if st.sidebar.button(label='Cargar Base de Datos', key='button1'):
+    st.session_state.db_loaded = True
+    st.session_state.db = pd.DataFrame(
         run_query(
-    f'''
-    SELECT home, away, team, player,
-        outcome_type, type, x, y, end_x, end_y, length
-    FROM `{table}`
-    WHERE type = '{event}'
-        AND team = '{team}'
-    '''
+            f'''
+            SELECT home, away, team, player,
+            outcome_type, type, x, y, end_x, end_y, length
+            FROM `{table}`
+            WHERE type = '{event}'
+                AND team = '{team}'
+'''
         )
     )
 
@@ -201,17 +220,19 @@ st.write(f'{league} {season} - {matches_played} Partidos')
 
 # -------------------------------------------------------------- Read Database
 
-if has_db:
+if st.session_state.db_loaded:
+    print('Load session-state-db to df')
+    df = st.session_state.db
     # Events
     team_colors = {'Chelsea': '#0b4393',
-                'Manchester United': '#de0011',
-                'Liverpool': '#f30022',
-                'Arsenal': '#db0007',
-                'Tottenham': '#0f1f4a',
-                'Aston Villa': '#650334',
-                'Newcastle United': '#231f20',
-                'Manchester City': '#1683E2',
-                }
+                   'Manchester United': '#de0011',
+                   'Liverpool': '#f30022',
+                   'Arsenal': '#db0007',
+                   'Tottenham': '#0f1f4a',
+                   'Aston Villa': '#650334',
+                   'Newcastle United': '#231f20',
+                   'Manchester City': '#1683E2',
+                   }
 
     if team in team_colors.keys():
         event1_marker_color1 = team_colors[team]
@@ -224,7 +245,8 @@ if has_db:
     players = st.sidebar.multiselect(
         label='Select players',
         options=df[df['team'] == team].player.dropna().sort_values().unique(),
-        default=df[df['team'] == team].player.dropna().sort_values().unique()[16],
+        default=df[df['team'] == team].player.dropna().sort_values().unique()[
+            11],
     )
 
     # Filter by actions against opposing team
@@ -241,7 +263,6 @@ if has_db:
 
     rivals = [rivals]
 
-
     if event == 'Pass':
         # Granular filter by pitch length
         l1, l2 = st.sidebar.select_slider(
@@ -251,8 +272,8 @@ if has_db:
             options=sorted(df[df['length'].notna()].loc[:, 'length'].unique()),
             # options=sorted(df['length'].unique()),
             value=(np.min(df['length'].dropna().unique()),
-                np.max(df['length'].dropna().unique())
-                )
+                   np.max(df['length'].dropna().unique())
+                   )
         )
         # Filtering occurs here
         df = df[(df['length'] >= l1) & (df['length'] <= l2)]
@@ -320,7 +341,7 @@ if has_db:
 
     # Dataframe used for showing table and for multi-player plot
     team_df = plot_df[['player', 'type', 'outcome_type',
-                    'x', 'y', 'end_x', 'end_y']]
+                       'x', 'y', 'end_x', 'end_y']]
     # FILTERING BY PLAYER IS DONE LAST SO WE CAN GET THE FILTERED DF OF ALL PLAYERS
     # Filter by player
     plot_df = plot_df[plot_df['player'].isin(players)]
@@ -331,7 +352,8 @@ if has_db:
     # Count and get % of total
     team_events = team_df.count()['player']
     # Successful - Count
-    scc_team = team_df[team_df['outcome_type'] == 'Successful'].count()['player']
+    scc_team = team_df[team_df['outcome_type'] == 'Successful'].count()[
+        'player']
     # Unsuccessful
     fail_team = team_df[team_df['outcome_type'] == 'Unsuccessful'].count()[
         'player']
@@ -355,8 +377,8 @@ if has_db:
 
         # Successful - Count
         scc_player[player] = \
-        player_df[player][team_df['outcome_type'] == 'Successful'].count()[
-            'player']
+            player_df[player][team_df['outcome_type'] == 'Successful'].count()[
+                'player']
 
         if player_events[player] > 0:
             player_cmp[player] = round(
@@ -367,13 +389,13 @@ if has_db:
         # Unsuccessful
 
         fail_player[player] = \
-        player_df[player][team_df['outcome_type'] == 'Unsuccessful'].count()[
-            'player']
+            player_df[player][
+                team_df['outcome_type'] == 'Unsuccessful'].count()[
+                'player']
 
     # ------------------ SORT TOP 5 PLAYERS
     top = team_df[['player', 'type']].groupby(['player']).agg('count')
     top = top.sort_values(by=['type'], ascending=False).head()
-
 
     # ------------------------------ FORMAT PLOT ----------------------------------
     # -------------------------- EDIT/CHANGE PARAMETERS
@@ -403,7 +425,6 @@ if has_db:
     grid_space = 0
 
     # Figure ratios between sections (title, pitch, credits)
-
 
     title_h = 0.1  # the title takes up 15% of the fig height
     grid_h = 0.7  # the grid takes up 71.5% of the figure height
@@ -451,7 +472,6 @@ if has_db:
     pitch_line_color = '#03191E'
     pitch_bg_color = '#faf9f4'
 
-
     event2_marker_color1 = '#B5B4B2'
     event_line_width1 = 1.8
 
@@ -477,7 +497,6 @@ if has_db:
 
     # --- Figure: Credits
 
-
     # --------------------------- PLOT 2 PARAMETERS -------------------------------
     # Figure
     margin = 7
@@ -491,7 +510,7 @@ if has_db:
 
     # Subtitle
     subtitle1_text2 = f'{season} {league[8:]} | vs. {rivals[0]} | ' \
-                    f'Top 3 Players with Most Attempted Passes'
+                      f'Top 3 Players with Most Attempted Passes'
     subtitle_size2 = 16
 
     subtitle1_x2 = 0.091
@@ -527,7 +546,6 @@ if has_db:
 
     # label_completed2 = f'{scc_player[players[i]]} completed'
     # label_missed2 = f'{player_events[players[i]] - scc_player[players[i]]} missed'
-
 
     # Events
     event1_marker_color2 = event1_marker_color1
@@ -585,9 +603,12 @@ if has_db:
                 nrows=1, ncols=1,
                 figheight=7,
 
-                title_height=title_h,  # the title takes up 15% of the fig height
-                grid_height=grid_h,  # the grid takes up 71.5% of the figure height
-                endnote_height=endnote_h,  # endnote takes up 6.5% of the figure height
+                title_height=title_h,
+                # the title takes up 15% of the fig height
+                grid_height=grid_h,
+                # the grid takes up 71.5% of the figure height
+                endnote_height=endnote_h,
+                # endnote takes up 6.5% of the figure height
                 #
                 grid_width=grid_w,  # gris takes up 95% of the figure width
                 #
@@ -597,7 +618,8 @@ if has_db:
                 # # 1% of fig height is space between pitch and endnote
                 endnote_space=endnote_space,
                 #
-                space=space,  # 5% of grid_height is reserved for space between axes
+                space=space,
+                # 5% of grid_height is reserved for space between axes
                 #
                 # # centers the grid horizontally / vertically
                 left=left_p,
@@ -629,10 +651,10 @@ if has_db:
             fig.lines.extend([l1])
 
             axs['pitch'].text(x=60, y=84,
-                            s='Dirección de Ataque',
-                            ha='center',
-                            size='10.5',
-    )
+                              s='Dirección de Ataque',
+                              ha='center',
+                              size='10.5',
+                              )
 
             # Figure background color
             fig.patch.set_facecolor(fig_bg_color)
@@ -649,7 +671,7 @@ if has_db:
                 ha='center',
             )
             axs['pitch'].text(
-                x=120+margin1,
+                x=120 + margin1,
                 y=60,
                 s='o',
                 c=fig_bg_color,
@@ -853,8 +875,10 @@ if has_db:
                 figheight=10,
 
                 title_height=0.15,  # the title takes up 15% of the fig height
-                grid_height=0.7,  # the grid takes up 71.5% of the figure height
-                endnote_height=0.03,  # endnote takes up 6.5% of the figure height
+                grid_height=0.7,
+                # the grid takes up 71.5% of the figure height
+                endnote_height=0.03,
+                # endnote takes up 6.5% of the figure height
 
                 grid_width=0.5,  # gris takes up 95% of the figure width
 
@@ -864,7 +888,8 @@ if has_db:
                 # 1% of fig height is space between pitch and endnote
                 endnote_space=0.01,
 
-                space=0.1,  # 5% of grid_height is reserved for space between axes
+                space=0.1,
+                # 5% of grid_height is reserved for space between axes
 
                 # centers the grid horizontally / vertically
                 left=0,
@@ -882,8 +907,8 @@ if has_db:
                 s='o',
                 c=fig_bg_color,
             )
-            axs2['pitch'][len(players)-1].text(
-                x=80+margin,
+            axs2['pitch'][len(players) - 1].text(
+                x=80 + margin,
                 y=50,
                 s='o',
                 c=fig_bg_color,
@@ -913,20 +938,21 @@ if has_db:
             )
 
             logos = {'Manchester United': 'mu',
-                    'Arsenal': 'ar',
-                    'Aston Villa': 'av',
-                    'Chelsea': 'ch',
-                    'Liverpool': 'li',
-                    'Manchester City': 'mc',
-                    'Newcastle United': 'nu',
-                    'Tottenham': 'th',
-                    'West Ham': 'wh'}
+                     'Arsenal': 'ar',
+                     'Aston Villa': 'av',
+                     'Chelsea': 'ch',
+                     'Liverpool': 'li',
+                     'Manchester City': 'mc',
+                     'Newcastle United': 'nu',
+                     'Tottenham': 'th',
+                     'West Ham': 'wh'}
 
             # Add team logo
             if team in logos.keys():
                 image_path = f'images/{logos[team]}.png'
                 image = Image.open(image_path)
-                newax = fig2.add_axes([0, 0.855, 0.111, 0.111], anchor='W', zorder=1)
+                newax = fig2.add_axes([0, 0.855, 0.111, 0.111], anchor='W',
+                                      zorder=1)
                 newax.imshow(image)
                 newax.axis('off')
 
@@ -953,7 +979,7 @@ if has_db:
                 )
 
                 # ------------ Add 3rds Lines
-                y, _ = standard.transform([1/3 * 100, 2/3 * 100], [0, 0])
+                y, _ = standard.transform([1 / 3 * 100, 2 / 3 * 100], [0, 0])
 
                 pitch_thirds2 = axs2['pitch'][i].hlines(
                     y=y,
@@ -985,7 +1011,7 @@ if has_db:
                     ax=axs2['pitch'][i],
                     lw=event_line_width2,
                     label=f'{player_events[players[i]] - scc_player[players[i]]}'
-                        f' missed',
+                          f' missed',
 
                     transparent=is_line_transparent,
                     alpha_start=line_alpha_start2,
@@ -1104,8 +1130,8 @@ if has_db:
             )
 
             st.pyplot(fig2,
-                    # use_container_width=False
-                    )
+                      # use_container_width=False
+                      )
     #
     # with tab_four:
     #
@@ -1279,51 +1305,51 @@ if has_db:
     #             zorder=2,
     #         )
 
-        # plt.savefig('filename.png',
-        #             bbox_inches='tight',
-        #             dpi=500
-        #             )
-        #
-        # st.pyplot(fig2,
-        #           # use_container_width=False
-        #           )
+    # plt.savefig('filename.png',
+    #             bbox_inches='tight',
+    #             dpi=500
+    #             )
+    #
+    # st.pyplot(fig2,
+    #           # use_container_width=False
+    #           )
 
     st.write('Instrucciones:\n'
-            '1. Selecciona un Equipo\n'
-            '2. Selecciona un Jugador\n'
-            '3. Selecciona uno o mas rivales.\n\n'
-            )
+             '1. Selecciona un Equipo\n'
+             '2. Selecciona un Jugador\n'
+             '3. Selecciona uno o mas rivales.\n\n'
+             )
 
     st.divider()
 
     st.write(
-            'Aquí hay un desglose de los pases de los jugadores seleccionados, y '
-            'abajo se destacan los jugadores del equipo seleccionado que mas '
-            'pases dieron. Podrían ser de interés.\n'
-            )
+        'Aquí hay un desglose de los pases de los jugadores seleccionados, y '
+        'abajo se destacan los jugadores del equipo seleccionado que mas '
+        'pases dieron. Podrían ser de interés.\n'
+    )
 
     if team_events > 0:
-        prec = round(scc_team/team_events * 100, 1)
+        prec = round(scc_team / team_events * 100, 1)
     else:
         prec = 0.0
 
     passes_df = [
         {'Player': team,
-        'Pases Totales': team_events,
-        'Completados': scc_team,
-        'Fallados': fail_team,
-        'Precision (%)': prec}
+         'Pases Totales': team_events,
+         'Completados': scc_team,
+         'Fallados': fail_team,
+         'Precision (%)': prec}
 
     ]
 
     for i, pl in enumerate(players):
         passes_df.append(
             {'Player': pl,
-            'Pases Totales': player_events[pl],
-            'Completados': scc_player[pl],
-            'Fallados': fail_player[pl],
-            'Precision (%)': player_cmp[pl]
-            }
+             'Pases Totales': player_events[pl],
+             'Completados': scc_player[pl],
+             'Fallados': fail_player[pl],
+             'Precision (%)': player_cmp[pl]
+             }
         )
 
     st.write(pd.DataFrame(passes_df))
@@ -1333,9 +1359,9 @@ if has_db:
     st.divider()
 
     st.write('Instrucciones adicionales:\n\n'
-            'Puedes cambiar los filtros de la barra lateral para mayor '
-            'exploración de datos. Por ejemplo, puedes seleccionar solo 3 '
-            'jugadores (quizás los 3 que mas pases dieron?) y seleccionar '
-            'la pestana "Tres Jugadores".')
+             'Puedes cambiar los filtros de la barra lateral para mayor '
+             'exploración de datos. Por ejemplo, puedes seleccionar solo 3 '
+             'jugadores (quizás los 3 que mas pases dieron?) y seleccionar '
+             'la pestana "Tres Jugadores".')
 
     st.divider()
