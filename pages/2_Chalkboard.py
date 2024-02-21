@@ -1,7 +1,6 @@
 # App
 import streamlit as st
 from streamlit.connections import BaseConnection
-from streamlit_extras.stateful_button import button as st_button
 import datetime
 
 # Manage data
@@ -15,7 +14,6 @@ from matplotlib.patches import FancyArrow
 from PIL import Image
 
 # Cloud storage
-# from st_supabase_connection import SupabaseConnection
 from google.oauth2 import service_account
 from google.cloud import bigquery
 
@@ -29,10 +27,6 @@ from google.cloud import bigquery
 
 
 # --------------------------------- FUNCTIONS ---------------------------------
-# @st.cache_data()
-# def read_csv(link):
-#     return pd.read_csv(link)
-
 # Perform query.
 # Uses st.cache_data to only rerun when the query changes or after 10 min.
 @st.cache_data(ttl=600)
@@ -46,9 +40,22 @@ def run_query(query):
     return rows
 
 
-def print_func(name: str):
-    now = datetime.datetime.now()
-    print(f'[{now}] {name} changed')
+def reset_db_flag():
+    st.session_state.db_loaded = False
+
+
+
+@st.cache_data(ttl=600)
+def get_all_teams(league_table):
+    all_teams = run_query(
+    f'''
+        SELECT DISTINCT team from `{league_table}`
+        ORDER BY team ASC
+        '''
+)
+    all_teams = [row['team'] for row in all_teams]
+    
+    return all_teams
 
 
 def replace_thirds(val):
@@ -93,9 +100,6 @@ def plot_attacking(ax):
     return pitch
 
 
-# Standardizer
-standard = Standardizer(pitch_from='opta', pitch_to='statsbomb')
-
 # ---------------------------------------------------------------- Page config
 st.set_page_config(
     page_title='Análisis de Datos',
@@ -112,11 +116,6 @@ if "db_loaded" not in st.session_state:
     st.session_state.db_loaded = False
     st.session_state.db = ''
 
-# ------------------------------------------------------------------ LOAD DATA
-# df = read_csv('data/2324_events.csv')
-
-# Initialize connection.
-# conn = st.connection("supabase", type=SupabaseConnection)
 
 # ------------------------------- DASHBOARD  ----------------------------------
 # ---------------------------- SIDEBAR FILTERS --------------------------------
@@ -129,7 +128,7 @@ league = st.sidebar.selectbox(
              'Italian Serie A'
              ],
     # options=df.type.unique(),
-    # on_change=league_func()
+    on_change=reset_db_flag,
 )
 
 league_names = {'English Premier League': 'EPL',
@@ -141,7 +140,7 @@ season = st.sidebar.selectbox(
     label='Select Season',
     # options=['Pass'],
     options=['23/24'],
-    # options=df.type.unique(),
+    on_change=reset_db_flag,
 )
 
 season_short = season.replace('/', '')
@@ -153,39 +152,24 @@ table = f"{db}.{league_short}{season_short}"
 event = st.sidebar.selectbox(
     label='Select event',
     options=['Pass'],
-    # options=['Pass', 'Goal'],
-    # options=df.type.unique(),
+    key='event_type'
 )
-
-all_teams = run_query(
-    f'''
-        SELECT DISTINCT team from `{table}`
-        ORDER BY team ASC
-        '''
-)
-
-all_teams = [row['team'] for row in all_teams]
-
-# if 'team' not in st.session_state:
-#     st.session_state.team = ''
 
 # Selectbox to highlight team
-st.sidebar.selectbox(
+team = st.sidebar.selectbox(
     label='Select team',
-    options=all_teams,
-    index=7,
+    options=get_all_teams(table),
+    # index=7,
     key='team',
-    on_change=print_func('team_selectbox')
+    on_change=reset_db_flag,
 )
-
-team = st.session_state.team
 
 matches_played = len(run_query(
     f'''
     SELECT DISTINCT home, away FROM `whoscored_events.{league_short}{season_short}`
     WHERE team = '{team}'
     '''
-)
+    )
 )
 
 # Return only selected type of events from selected team
@@ -221,7 +205,9 @@ st.write(f'{league} {season} - {matches_played} Partidos')
 # -------------------------------------------------------------- Read Database
 
 if st.session_state.db_loaded:
-    print('Load session-state-db to df')
+    # Standardizer
+    standard = Standardizer(pitch_from='opta', pitch_to='statsbomb')
+
     df = st.session_state.db
     # Events
     team_colors = {'Chelsea': '#0b4393',

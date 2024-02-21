@@ -1,5 +1,4 @@
 # requirements.txt
-
 streamlit~=1.31.0
 mplsoccer~=1.2.1
 pandas~=2.1.0
